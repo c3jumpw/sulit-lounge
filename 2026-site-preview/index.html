@@ -1,1 +1,564 @@
 
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garant:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap');
+
+  .sl-root {
+    background: #09080A;
+    color: #F0E6D3;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .sl-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid rgba(200,146,42,0.18);
+    position: relative;
+    z-index: 10;
+  }
+  .sl-nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: #C8922A;
+    text-transform: uppercase;
+  }
+  .sl-nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sl-nav-links a {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(240,230,211,0.6);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .sl-nav-links a:hover { color: #C8922A; }
+  .sl-nav-reserve {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #C8922A;
+    border: 1px solid #C8922A;
+    padding: 0.5rem 1.25rem;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer;
+  }
+  .sl-nav-reserve:hover {
+    background: #C8922A;
+    color: #09080A;
+  }
+
+  .sl-hero {
+    position: relative;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+  .sl-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 60%, #2A1A08 0%, #09080A 100%);
+  }
+  .sl-smoke-wrap {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .sl-smoke {
+    position: absolute;
+    bottom: 0;
+    width: 2px;
+    border-radius: 999px;
+    opacity: 0;
+    animation: smokeRise linear infinite;
+  }
+  .sl-smoke:nth-child(1) { left: 47%; background: rgba(200,146,42,0.25); height: 320px; animation-duration: 6s; animation-delay: 0s; }
+  .sl-smoke:nth-child(2) { left: 50%; background: rgba(200,146,42,0.15); height: 280px; animation-duration: 7s; animation-delay: 1.5s; }
+  .sl-smoke:nth-child(3) { left: 53%; background: rgba(200,146,42,0.20); height: 300px; animation-duration: 8s; animation-delay: 3s; }
+  @keyframes smokeRise {
+    0%   { opacity: 0; transform: translateY(0) scaleX(1); }
+    20%  { opacity: 0.8; }
+    80%  { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(-350px) scaleX(8); }
+  }
+
+  .sl-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+  }
+  .sl-eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #C8922A;
+    margin-bottom: 1.5rem;
+  }
+  .sl-hero-wordmark {
+    font-family: 'Cinzel', serif;
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #F0E6D3;
+    line-height: 1;
+    margin: 0 0 0.15em;
+  }
+  .sl-hero-wordmark span {
+    color: #C8922A;
+  }
+  .sl-hero-sub {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: rgba(200,146,42,0.7);
+    border-top: 1px solid rgba(200,146,42,0.3);
+    border-bottom: 1px solid rgba(200,146,42,0.3);
+    padding: 0.5rem 0;
+    margin: 0 0 2rem;
+    display: inline-block;
+  }
+  .sl-hero-tagline {
+    font-family: 'Cormorant Garant', serif;
+    font-style: italic;
+    font-size: 20px;
+    font-weight: 300;
+    color: rgba(240,230,211,0.65);
+    margin: 0 0 2.5rem;
+    line-height: 1.6;
+  }
+  .sl-hero-ctas {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .sl-btn-primary {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: #C8922A;
+    color: #09080A;
+    border: none;
+    padding: 0.85rem 2rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .sl-btn-ghost {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: transparent;
+    color: #F0E6D3;
+    border: 1px solid rgba(240,230,211,0.35);
+    padding: 0.85rem 2rem;
+    cursor: pointer;
+  }
+  .sl-btn-ghost:hover { border-color: #C8922A; color: #C8922A; }
+
+  .sl-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 2rem;
+    margin: 0;
+  }
+  .sl-divider-line { flex: 1; height: 1px; background: rgba(200,146,42,0.18); }
+  .sl-divider-diamond {
+    width: 6px; height: 6px;
+    background: #C8922A;
+    transform: rotate(45deg);
+  }
+
+  .sl-section {
+    padding: 4rem 2rem;
+  }
+  .sl-section-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #C8922A;
+    margin-bottom: 0.75rem;
+  }
+  .sl-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: #F0E6D3;
+    margin: 0 0 1rem;
+    line-height: 1.25;
+  }
+  .sl-section-body {
+    font-family: 'Cormorant Garant', serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: rgba(240,230,211,0.65);
+    line-height: 1.7;
+    max-width: 480px;
+  }
+
+  .sl-about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 360px;
+  }
+  .sl-about-left {
+    background: #110D08;
+    border: 1px solid rgba(200,146,42,0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem;
+  }
+  .sl-about-right {
+    background: linear-gradient(135deg, #1A1008 0%, #0D0907 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(200,146,42,0.1);
+    border-left: none;
+  }
+  .sl-hookah-glyph {
+    font-family: 'Cinzel', serif;
+    font-size: 120px;
+    color: rgba(200,146,42,0.08);
+    position: absolute;
+    line-height: 1;
+    user-select: none;
+  }
+  .sl-about-stat-row {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(200,146,42,0.2);
+  }
+  .sl-stat-num {
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #C8922A;
+    line-height: 1;
+  }
+  .sl-stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(240,230,211,0.4);
+    margin-top: 0.25rem;
+  }
+
+  .sl-experience {
+    background: #0D0A07;
+    border-top: 1px solid rgba(200,146,42,0.12);
+    border-bottom: 1px solid rgba(200,146,42,0.12);
+  }
+  .sl-exp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(200,146,42,0.12);
+    margin-top: 3rem;
+  }
+  .sl-exp-card {
+    background: #09080A;
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+  .sl-exp-icon {
+    font-size: 28px;
+    color: #C8922A;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .sl-exp-title {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    color: #F0E6D3;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+  }
+  .sl-exp-desc {
+    font-family: 'Cormorant Garant', serif;
+    font-style: italic;
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(240,230,211,0.5);
+    line-height: 1.6;
+  }
+
+  .sl-hours-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .sl-hours-list {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sl-hours-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(200,146,42,0.1);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: rgba(240,230,211,0.6);
+    letter-spacing: 0.05em;
+  }
+  .sl-hours-list li .day { color: rgba(240,230,211,0.4); }
+  .sl-hours-list li .time { color: #C8922A; }
+  .sl-hours-list li.closed .time { color: rgba(240,230,211,0.25); }
+
+  .sl-reserve-banner {
+    background: #C8922A;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .sl-reserve-banner .sl-section-title {
+    color: #09080A;
+    font-size: 32px;
+  }
+  .sl-reserve-banner p {
+    font-family: 'Cormorant Garant', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: rgba(9,8,10,0.65);
+    margin: 0.5rem 0 2rem;
+  }
+  .sl-btn-dark {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: #09080A;
+    color: #C8922A;
+    border: none;
+    padding: 0.85rem 2.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    margin: 0 0.5rem;
+  }
+
+  .sl-footer {
+    background: #06050A;
+    border-top: 1px solid rgba(200,146,42,0.12);
+    padding: 2.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .sl-footer-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: #C8922A;
+  }
+  .sl-footer-info {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: rgba(240,230,211,0.3);
+    text-align: center;
+    line-height: 1.7;
+    letter-spacing: 0.05em;
+  }
+  .sl-footer-social {
+    display: flex;
+    gap: 1rem;
+  }
+  .sl-footer-social a {
+    font-size: 18px;
+    color: rgba(240,230,211,0.35);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .sl-footer-social a:hover { color: #C8922A; }
+
+  .sl-hookah-svg {
+    opacity: 0.12;
+    position: absolute;
+  }
+</style>
+
+<div class="sl-root">
+
+  <nav class="sl-nav">
+    <div class="sl-nav-logo">Sulit Lounge</div>
+    <ul class="sl-nav-links">
+      <li><a href="#">Menu</a></li>
+      <li><a href="#">Drinks</a></li>
+      <li><a href="#">Events</a></li>
+      <li><a href="#">Gallery</a></li>
+    </ul>
+    <a class="sl-nav-reserve" href="#">Reserve a Table</a>
+  </nav>
+
+  <section class="sl-hero">
+    <div class="sl-hero-bg"></div>
+    <div class="sl-smoke-wrap">
+      <div class="sl-smoke"></div>
+      <div class="sl-smoke"></div>
+      <div class="sl-smoke"></div>
+    </div>
+    <div class="sl-hero-content">
+      <p class="sl-eyebrow">Alpharetta, Georgia · Est. 2021</p>
+      <h1 class="sl-hero-wordmark">SUL<span>I</span>T</h1>
+      <div class="sl-hero-sub">Lounge</div>
+      <p class="sl-hero-tagline">Where the night finds its rhythm —<br>crafted drinks, elevated atmosphere, unforgettable company.</p>
+      <div class="sl-hero-ctas">
+        <button class="sl-btn-primary" onclick="sendPrompt('Show me how to make a reservation at Sulit Lounge')">Reserve Your Evening</button>
+        <button class="sl-btn-ghost" onclick="sendPrompt('Tell me about the drinks menu at Sulit Lounge')">Explore the Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sl-divider"><div class="sl-divider-line"></div><div class="sl-divider-diamond"></div><div class="sl-divider-line"></div></div>
+
+  <div class="sl-about">
+    <div class="sl-about-left">
+      <div class="sl-section-label">Our Story</div>
+      <h2 class="sl-section-title">A Lounge Born from Passion</h2>
+      <p class="sl-section-body">Sulit is a space where every detail has intention — from the lighting to the last sip. We've reimagined what a night out can be: intimate, elevated, and entirely yours.</p>
+      <div class="sl-about-stat-row">
+        <div>
+          <div class="sl-stat-num">Fri–Sat</div>
+          <div class="sl-stat-label">Open till 2AM</div>
+        </div>
+        <div>
+          <div class="sl-stat-num">5PM</div>
+          <div class="sl-stat-label">Doors Open Nightly</div>
+        </div>
+        <div>
+          <div class="sl-stat-num">Alpharetta</div>
+          <div class="sl-stat-label">Old Milton Pkwy</div>
+        </div>
+      </div>
+    </div>
+    <div class="sl-about-right">
+      <svg class="sl-hookah-svg" width="180" height="280" viewBox="0 0 180 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="90" cy="48" rx="28" ry="14" stroke="#C8922A" stroke-width="3"/>
+        <rect x="82" y="60" width="16" height="50" rx="4" fill="#C8922A"/>
+        <ellipse cx="90" cy="115" rx="42" ry="20" stroke="#C8922A" stroke-width="2.5"/>
+        <rect x="84" y="135" width="12" height="70" rx="4" fill="#C8922A"/>
+        <ellipse cx="90" cy="210" rx="50" ry="22" fill="#C8922A"/>
+        <ellipse cx="90" cy="210" rx="34" ry="14" fill="#1A1008"/>
+        <line x1="90" y1="62" x2="40" y2="40" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="90" y1="62" x2="140" y2="40" stroke="#C8922A" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="40" cy="38" r="6" fill="#C8922A"/>
+        <circle cx="140" cy="38" r="6" fill="#C8922A"/>
+      </svg>
+      <div style="position:relative;z-index:2;text-align:center;">
+        <div style="font-family:'Cormorant Garant',serif;font-style:italic;font-size:22px;color:rgba(200,146,42,0.7);line-height:1.5;">
+          "The most memorable<br>evenings begin here."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sl-divider" style="margin-top:0;"><div class="sl-divider-line"></div><div class="sl-divider-diamond"></div><div class="sl-divider-line"></div></div>
+
+  <section class="sl-section sl-experience">
+    <div style="text-align:center;">
+      <div class="sl-section-label" style="text-align:center;">The Sulit Experience</div>
+      <h2 class="sl-section-title" style="text-align:center;max-width:400px;margin:0 auto 0.5rem;">Everything the Night Should Be</h2>
+    </div>
+    <div class="sl-exp-grid">
+      <div class="sl-exp-card">
+        <i class="ti ti-glass-full sl-exp-icon" aria-hidden="true"></i>
+        <div class="sl-exp-title">Craft Cocktails & Wine</div>
+        <p class="sl-exp-desc">A curated bar program built around bold flavors and seamless service — every pour, considered.</p>
+      </div>
+      <div class="sl-exp-card">
+        <i class="ti ti-users sl-exp-icon" aria-hidden="true"></i>
+        <div class="sl-exp-title">Private Events & Parties</div>
+        <p class="sl-exp-desc">Host your celebration in an atmosphere that sets the tone before guests arrive.</p>
+      </div>
+      <div class="sl-exp-card">
+        <i class="ti ti-tools-kitchen-2 sl-exp-icon" aria-hidden="true"></i>
+        <div class="sl-exp-title">Thoughtful Small Plates</div>
+        <p class="sl-exp-desc">Dishes crafted to complement the evening — shareable, seasonal, and made to linger over.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="sl-divider"><div class="sl-divider-line"></div><div class="sl-divider-diamond"></div><div class="sl-divider-line"></div></div>
+
+  <section class="sl-section">
+    <div class="sl-hours-section">
+      <div>
+        <div class="sl-section-label">Hours</div>
+        <h2 class="sl-section-title">Plan Your Visit</h2>
+        <ul class="sl-hours-list">
+          <li class="closed"><span class="day">Monday</span><span class="time">Closed</span></li>
+          <li><span class="day">Tuesday – Thursday</span><span class="time">5PM – 12AM</span></li>
+          <li><span class="day">Friday – Saturday</span><span class="time">5PM – 2AM</span></li>
+          <li><span class="day">Sunday</span><span class="time">5PM – 12AM</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="sl-section-label">Location</div>
+        <h2 class="sl-section-title">Find Us</h2>
+        <p class="sl-section-body" style="font-size:15px;margin-top:1.5rem;">
+          4150 Old Milton Pkwy, Suite 120<br>
+          Alpharetta, GA 30005
+        </p>
+        <p style="margin-top:1.5rem;">
+          <a href="tel:6783369576" style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.2em;color:#C8922A;text-decoration:none;">(678) 336-9576</a>
+        </p>
+        <button class="sl-btn-ghost" style="margin-top:1.5rem;font-size:10px;" onclick="sendPrompt('How do I get to Sulit Lounge in Alpharetta?')">
+          Get Directions &rarr;
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sl-reserve-banner">
+    <h2 class="sl-section-title">Ready for Your Evening?</h2>
+    <p>Tables fill quickly on weekends — secure yours today.</p>
+    <button class="sl-btn-dark" onclick="sendPrompt('I want to make a reservation at Sulit Lounge')">Make a Reservation</button>
+    <button class="sl-btn-dark" style="background:transparent;border:2px solid #09080A;color:#09080A;" onclick="sendPrompt('Tell me about private event packages at Sulit Lounge')">Inquire About Events</button>
+  </div>
+
+  <footer class="sl-footer">
+    <div class="sl-footer-brand">SULIT LOUNGE</div>
+    <div class="sl-footer-info">
+      4150 Old Milton Pkwy, Suite 120 · Alpharetta, GA 30005<br>
+      sulitcoffeebar@gmail.com · (678) 336-9576
+    </div>
+    <div class="sl-footer-social">
+      <a href="#" aria-label="Facebook"><i class="ti ti-brand-facebook"></i></a>
+      <a href="#" aria-label="Instagram"><i class="ti ti-brand-instagram"></i></a>
+    </div>
+  </footer>
+
+</div>
