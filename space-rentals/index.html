@@ -1,1 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group &amp; Private Events — Sulit Lounge</title>
+<link rel="icon" type="image/png" href="../media/favi.png">
+<link rel="shortcut icon" href="../media/favi.png">
+<link rel="apple-touch-icon" href="../media/apple.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#09080A;min-height:100vh;font-family:'Georgia',serif;color:#F0E6D3}
+a{color:#C8922A;text-decoration:none}
+a:hover{text-decoration:underline}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid rgba(200,146,42,0.18)}
+.nav-logo{height:36px;object-fit:contain}
+.nav-back{font-family:sans-serif;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(240,230,211,0.5);display:flex;align-items:center;gap:6px}
+.nav-back:hover{color:#C8922A;text-decoration:none}
+.nav-link{font-family:sans-serif;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#C8922A;padding:7px 16px;border:1px solid rgba(200,146,42,0.35);border-radius:2px}
+.nav-link:hover{background:rgba(200,146,42,0.08);text-decoration:none}
+.hero{padding:48px 24px 32px;text-align:center;border-bottom:1px solid rgba(200,146,42,0.2)}
+.eyebrow{color:#C8922A;letter-spacing:0.3em;font-size:11px;font-family:sans-serif;font-weight:600;text-transform:uppercase;margin-bottom:14px}
+.hero h1{color:#F0E6D3;font-size:30px;font-weight:400;letter-spacing:0.04em;margin-bottom:10px}
+.hero p{color:rgba(240,230,211,0.5);font-size:14px;font-family:sans-serif;line-height:1.7;max-width:440px;margin:0 auto}
+.badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:18px}
+.badge{background:rgba(200,146,42,0.07);border:1px solid rgba(200,146,42,0.18);border-radius:2px;color:rgba(240,230,211,0.55);font-family:sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:5px 11px}
+.stepper{display:flex;align-items:flex-start;justify-content:center;padding:28px 24px 0;max-width:520px;margin:0 auto}
+.step{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1;position:relative}
+.step:not(:last-child)::after{content:'';position:absolute;top:13px;left:55%;width:90%;height:1px;background:rgba(200,146,42,0.15);z-index:0}
+.step.done:not(:last-child)::after{background:rgba(200,146,42,0.45)}
+.snum{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:sans-serif;font-weight:700;border:1px solid rgba(200,146,42,0.22);color:rgba(240,230,211,0.28);background:transparent;position:relative;z-index:1;transition:all .25s}
+.step.active .snum{background:#C8922A;color:#09080A;border-color:#C8922A}
+.step.done .snum{background:rgba(200,146,42,0.1);color:#C8922A;border-color:rgba(200,146,42,0.5)}
+.slabel{font-size:10px;font-family:sans-serif;color:rgba(240,230,211,0.28);letter-spacing:0.1em;text-transform:uppercase;text-align:center}
+.step.active .slabel{color:#C8922A}
+.step.done .slabel{color:rgba(200,146,42,0.5)}
+.fwrap{max-width:520px;margin:0 auto;padding:32px 24px 64px}
+.panel{display:none}
+.panel.active{display:block}
+.stitle{color:#C8922A;font-size:10px;font-family:sans-serif;letter-spacing:0.3em;text-transform:uppercase;margin-bottom:20px;padding-bottom:9px;border-bottom:1px solid rgba(200,146,42,0.15)}
+.field{margin-bottom:17px}
+.field label{display:block;font-size:11px;font-family:sans-serif;color:rgba(240,230,211,0.48);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px}
+.opt{color:rgba(240,230,211,0.28);font-size:10px;font-weight:normal;text-transform:lowercase;letter-spacing:0}
+.field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,0.025);border:1px solid rgba(200,146,42,0.18);border-radius:3px;color:#F0E6D3;font-family:sans-serif;font-size:14px;padding:11px 13px;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C8922A'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.field textarea{resize:vertical;min-height:96px;line-height:1.55}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#C8922A;background:rgba(200,146,42,0.03)}
+.field input::placeholder,.field textarea::placeholder{color:rgba(240,230,211,0.2)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.hint{font-size:11px;color:rgba(240,230,211,0.32);font-family:sans-serif;margin-top:5px;line-height:1.5}
+.infobox{background:rgba(200,146,42,0.04);border-left:2px solid rgba(200,146,42,0.6);padding:13px 15px;margin-bottom:20px}
+.infobox p{font-size:13px;font-family:sans-serif;color:rgba(240,230,211,0.55);line-height:1.6}
+.infobox strong{color:#C8922A}
+.cbfield{display:flex;align-items:flex-start;gap:10px;padding:13px;border:1px solid rgba(200,146,42,0.13);border-radius:3px;background:rgba(200,146,42,0.02);cursor:pointer;margin-bottom:17px}
+.cbfield input[type=checkbox]{width:15px;height:15px;flex-shrink:0;accent-color:#C8922A;margin-top:2px;cursor:pointer}
+.cbfield span{font-size:12px;font-family:sans-serif;color:rgba(240,230,211,0.45);line-height:1.55}
+.brow{display:flex;gap:10px;margin-top:24px}
+.btn{flex:1;padding:13px;border:none;border-radius:3px;font-family:sans-serif;font-size:12px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:all .18s}
+.btn-g{background:#C8922A;color:#09080A}
+.btn-g:hover{background:#d9a03c}
+.btn-o{background:transparent;color:#C8922A;border:1px solid rgba(200,146,42,0.32)}
+.btn-o:hover{background:rgba(200,146,42,0.06)}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.scard{background:rgba(200,146,42,0.04);border:1px solid rgba(200,146,42,0.16);border-radius:3px;padding:16px;margin-bottom:20px}
+.srow{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid rgba(200,146,42,0.09);font-family:sans-serif;font-size:13px}
+.srow:last-child{border-bottom:none}
+.slb{color:rgba(240,230,211,0.42);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0;margin-right:12px}
+.svl{color:#F0E6D3;font-weight:500;text-align:right;word-break:break-word}
+.succ{text-align:center;padding:52px 24px}
+.sico{width:56px;height:56px;border-radius:50%;background:rgba(200,146,42,0.09);border:1px solid rgba(200,146,42,0.28);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;color:#C8922A}
+.succ h2{color:#F0E6D3;font-size:24px;font-weight:400;margin-bottom:10px;letter-spacing:0.03em}
+.succ p{color:rgba(240,230,211,0.48);font-size:14px;font-family:sans-serif;line-height:1.7;max-width:360px;margin:0 auto}
+.gdiv{border:none;border-top:1px solid rgba(200,146,42,0.15);margin:24px 0}
+.succ-logo{height:32px;margin:0 auto 6px;display:block;opacity:0.5}
+.status-sending{text-align:center;padding:20px;font-family:sans-serif;font-size:13px;color:rgba(240,230,211,0.5)}
+.err{border-color:rgba(200,70,50,0.55) !important;background:rgba(200,70,50,0.035) !important}
+.errmsg{color:rgba(210,90,70,0.9);font-size:11px;font-family:sans-serif;margin-top:4px}
+@media(max-width:480px){
+  .row{grid-template-columns:1fr}
+  .nav{padding:14px 18px}
+  .hero{padding:36px 18px 26px}
+  .fwrap{padding:26px 18px 48px}
+  .badges{gap:6px}
+}
+</style>
+</head>
+<body>
 
+<nav class="nav">
+  <a href="../" class="nav-back">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to site
+  </a>
+  <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="nav-logo" onerror="this.style.display='none'">
+  <a href="reservations" class="nav-link">Table Reservation</a>
+</nav>
+
+<div class="hero">
+  <div class="eyebrow">Sulit Lounge &nbsp;&middot;&nbsp; Alpharetta, GA</div>
+  <h1>Group &amp; Private Events</h1>
+  <p>Birthday parties, baby showers, corporate functions, or a full venue buyout &mdash; let&rsquo;s make it memorable.</p>
+  <div class="badges">
+    <span class="badge">Birthday parties</span>
+    <span class="badge">Baby showers</span>
+    <span class="badge">Corporate events</span>
+    <span class="badge">Full venue buyout</span>
+  </div>
+</div>
+
+<div class="stepper" id="stepper">
+  <div class="step active" id="s1"><div class="snum">1</div><div class="slabel">Event Info</div></div>
+  <div class="step" id="s2"><div class="snum">2</div><div class="slabel">Contact</div></div>
+  <div class="step" id="s3"><div class="snum">3</div><div class="slabel">Confirm</div></div>
+</div>
+
+<div class="fwrap">
+
+  <!-- STEP 1 -->
+  <div class="panel active" id="p1">
+    <div class="stitle">Tell us about your event</div>
+    <div class="infobox">
+      <p>We accommodate groups of <strong>13 to 50+ guests</strong>. For smaller parties, use our <a href="reservations">standard reservation form</a>.</p>
+    </div>
+    <div class="field">
+      <label>Type of event</label>
+      <select id="e-type">
+        <option value="">Select occasion</option>
+        <option>Birthday party</option>
+        <option>Baby shower</option>
+        <option>Bridal shower</option>
+        <option>Anniversary</option>
+        <option>Office / corporate event</option>
+        <option>Full venue buyout</option>
+        <option>Graduation</option>
+        <option>Other celebration</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Preferred date</label>
+        <input type="date" id="e-date">
+      </div>
+      <div class="field">
+        <label>Start time</label>
+        <select id="e-time">
+          <option value="">Select time</option>
+          <option>5:00 PM</option><option>5:30 PM</option>
+          <option>6:00 PM</option><option>6:30 PM</option>
+          <option>7:00 PM</option><option>7:30 PM</option>
+          <option>8:00 PM</option><option>8:30 PM</option>
+          <option>9:00 PM</option><option>9:30 PM</option>
+          <option>10:00 PM</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Estimated guests</label>
+        <select id="e-guests">
+          <option value="">Select range</option>
+          <option>13 – 20</option>
+          <option>21 – 30</option>
+          <option>31 – 40</option>
+          <option>41 – 50</option>
+          <option>50+</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Estimated duration</label>
+        <select id="e-duration">
+          <option value="">Select duration</option>
+          <option>1 hour</option>
+          <option>2 hours</option>
+          <option>3 hours</option>
+          <option>4 hours</option>
+          <option>Full evening</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Budget per person <span class="opt">(optional)</span></label>
+      <select id="e-budget">
+        <option value="">Select range</option>
+        <option>Under $25</option>
+        <option>$25 – $50</option>
+        <option>$50 – $75</option>
+        <option>$75 – $100</option>
+        <option>$100+</option>
+        <option>Flexible / TBD</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Alternate date <span class="opt">(optional)</span></label>
+      <input type="date" id="e-altdate">
+      <div class="hint">In case your first choice isn&rsquo;t available.</div>
+    </div>
+    <div class="brow">
+      <button class="btn btn-g" onclick="goStep(2)">Continue &rarr;</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="panel" id="p2">
+    <div class="stitle">Your contact information</div>
+    <div class="row">
+      <div class="field">
+        <label>Full name</label>
+        <input type="text" id="e-name" placeholder="e.g. Nina Simone" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input type="tel" id="e-phone" placeholder="(404) 555-0100" autocomplete="tel">
+      </div>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="e-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Company / organization <span class="opt">(optional)</span></label>
+      <input type="text" id="e-company" placeholder="Name of business or group if applicable">
+    </div>
+    <div class="field">
+      <label>How did you hear about us? <span class="opt">(optional)</span></label>
+      <select id="e-source">
+        <option value="">Select one</option>
+        <option>Google</option>
+        <option>Instagram</option>
+        <option>TikTok</option>
+        <option>Facebook</option>
+        <option>Friend or family</option>
+        <option>I've been here before</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Event details &amp; special requests</label>
+      <textarea id="e-notes" placeholder="Theme, decor preferences, catering needs, AV requirements, anything that will help us plan your perfect event..."></textarea>
+    </div>
+    <div class="cbfield">
+      <input type="checkbox" id="e-sms">
+      <span>I agree to receive text updates from Sulit Lounge about my event inquiry, specials, and offers. Message &amp; data rates may apply. Reply STOP to cancel.</span>
+    </div>
+    <div class="brow">
+      <button class="btn btn-o" onclick="goStep(1)">&larr; Back</button>
+      <button class="btn btn-g" onclick="goStep(3)">Review &rarr;</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="panel" id="p3">
+    <div class="stitle">Review your inquiry</div>
+    <div class="scard" id="summary"></div>
+    <div class="infobox">
+      <p>After you submit, our events team will reach out within <strong>24 hours</strong> to discuss availability, packages, and next steps.</p>
+    </div>
+    <div class="brow">
+      <button class="btn btn-o" onclick="goStep(2)">&larr; Edit</button>
+      <button class="btn btn-g" id="submit-btn" onclick="submitForm()">Submit Inquiry</button>
+    </div>
+    <div class="status-sending" id="sending" style="display:none">Sending your inquiry&hellip;</div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="panel" id="p4">
+    <div class="succ">
+      <div class="sico">&#10003;</div>
+      <h2>Inquiry received.</h2>
+      <p>Thank you! Our events team will be in touch within 24 hours to confirm availability and walk you through your options. We look forward to hosting you.</p>
+      <hr class="gdiv">
+      <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="succ-logo" onerror="this.style.display='none'">
+      <p style="font-size:11px;color:rgba(240,230,211,0.3);font-family:sans-serif;margin-top:4px">sulitlounge@gmail.com</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzujLbZ7-o84n312UW5MuXorsEROWLlhUllWO2_Soz4yKMsTtOGCXB1sbxpzNmTfnqgiQ/exec';
+var cur = 1;
+
+function goStep(n) {
+  if (n > cur && !validate(cur)) return;
+  document.getElementById('p'+cur).classList.remove('active');
+  var fromS = document.getElementById('s'+cur);
+  fromS.classList.remove('active');
+  if (n > cur) fromS.classList.add('done');
+  else fromS.classList.remove('done');
+  cur = n;
+  document.getElementById('p'+cur).classList.add('active');
+  var toS = document.getElementById('s'+cur);
+  toS.classList.add('active');
+  toS.classList.remove('done');
+  if (n === 3) buildSummary();
+  window.scrollTo(0,0);
+}
+
+function validate(step) {
+  if (step === 1) {
+    if (!document.getElementById('e-type').value) return markErr('e-type','Please select an event type');
+    if (!document.getElementById('e-date').value) return markErr('e-date','Please select a date');
+    if (!document.getElementById('e-time').value) return markErr('e-time','Please select a start time');
+    if (!document.getElementById('e-guests').value) return markErr('e-guests','Please select a guest range');
+  }
+  if (step === 2) {
+    if (!document.getElementById('e-name').value.trim()) return markErr('e-name','Please enter your name');
+    if (!document.getElementById('e-phone').value.trim()) return markErr('e-phone','Please enter your phone');
+    var em = document.getElementById('e-email').value.trim();
+    if (!em || em.indexOf('@') < 0) return markErr('e-email','Please enter a valid email');
+    if (!document.getElementById('e-notes').value.trim()) return markErr('e-notes','Please tell us a bit about your event');
+  }
+  return true;
+}
+
+function markErr(id, msg) {
+  var el = document.getElementById(id);
+  el.classList.add('err');
+  var prev = el.parentNode.querySelector('.errmsg');
+  if (prev) prev.remove();
+  var e = document.createElement('div');
+  e.className='errmsg'; e.textContent=msg;
+  el.parentNode.appendChild(e);
+  el.addEventListener('input', function(){ el.classList.remove('err'); var m=el.parentNode.querySelector('.errmsg'); if(m)m.remove(); },{once:true});
+  el.addEventListener('change', function(){ el.classList.remove('err'); var m=el.parentNode.querySelector('.errmsg'); if(m)m.remove(); },{once:true});
+  return false;
+}
+
+function buildSummary() {
+  var rows = [
+    ['Event type', document.getElementById('e-type').value],
+    ['Date', document.getElementById('e-date').value],
+    ['Start time', document.getElementById('e-time').value],
+    ['Guests', document.getElementById('e-guests').value],
+    ['Duration', document.getElementById('e-duration').value || '&mdash;'],
+    ['Budget / person', document.getElementById('e-budget').value || '&mdash;'],
+    ['Alt. date', document.getElementById('e-altdate').value || '&mdash;'],
+    ['Contact', document.getElementById('e-name').value],
+    ['Phone', document.getElementById('e-phone').value],
+    ['Email', document.getElementById('e-email').value],
+    ['Company', document.getElementById('e-company').value || '&mdash;'],
+    ['Heard via', document.getElementById('e-source').value || '&mdash;'],
+    ['Details', document.getElementById('e-notes').value],
+  ];
+  document.getElementById('summary').innerHTML = rows.map(function(r){
+    return '<div class="srow"><span class="slb">'+r[0]+'</span><span class="svl">'+r[1]+'</span></div>';
+  }).join('');
+}
+
+function submitForm() {
+  var btn = document.getElementById('submit-btn');
+  var sending = document.getElementById('sending');
+  btn.disabled = true;
+  sending.style.display = 'block';
+
+  var payload = {
+    type: 'group_rental',
+    eventType: document.getElementById('e-type').value,
+    date: document.getElementById('e-date').value,
+    time: document.getElementById('e-time').value,
+    guests: document.getElementById('e-guests').value,
+    duration: document.getElementById('e-duration').value,
+    budget: document.getElementById('e-budget').value,
+    altDate: document.getElementById('e-altdate').value,
+    name: document.getElementById('e-name').value,
+    phone: document.getElementById('e-phone').value,
+    email: document.getElementById('e-email').value,
+    company: document.getElementById('e-company').value,
+    source: document.getElementById('e-source').value,
+    notes: document.getElementById('e-notes').value,
+    smsConsent: document.getElementById('e-sms').checked ? 'Yes' : 'No',
+    submittedAt: new Date().toLocaleString('en-US', {timeZone:'America/New_York'})
+  };
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(){
+    showSuccess();
+  }).catch(function(){
+    showSuccess();
+  });
+}
+
+function showSuccess() {
+  document.getElementById('p3').classList.remove('active');
+  document.getElementById('s3').classList.remove('active');
+  document.getElementById('s3').classList.add('done');
+  document.getElementById('p4').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+var today = new Date().toISOString().split('T')[0];
+document.getElementById('e-date').min = today;
+document.getElementById('e-date').value = today;
+var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+document.getElementById('e-altdate').min = tomorrow.toISOString().split('T')[0];
+</script>
+</body>
+</html>
