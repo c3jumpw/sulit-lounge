@@ -358,6 +358,7 @@ tr:hover td{background:var(--gold3);cursor:pointer}
     <div class="tab active" onclick="switchTab('res')">Reservations</div>
     <div class="tab" onclick="switchTab('rent')">Group Rentals</div>
     <div class="tab" onclick="switchTab('cal')">Schedule</div>
+    <div class="tab" onclick="switchTab('data')">Data</div>
   </div>
 
   <div class="content">
@@ -394,9 +395,10 @@ tr:hover td{background:var(--gold3);cursor:pointer}
         <div class="tbl-wrap">
           <table>
             <thead><tr>
-              <th onclick="sortBy('res','date')">Date<span class="sort-arrow">&#9650;</span></th>
+              <th onclick="sortBy('res','submittedAt')">Submitted<span class="sort-arrow">&#9650;</span></th>
+              <th onclick="sortBy('res','date')">Req. Date<span class="sort-arrow">&#9650;</span></th>
               <th onclick="sortBy('res','time')">Time<span class="sort-arrow">&#9650;</span></th>
-              <th>Name</th><th>Guests</th><th>Phone</th>
+              <th>Name</th><th>Guests</th>
               <th>Status</th><th>Actions</th>
             </tr></thead>
             <tbody id="res-body"><tr><td colspan="7" class="empty">Loading&hellip;</td></tr></tbody>
@@ -439,9 +441,10 @@ tr:hover td{background:var(--gold3);cursor:pointer}
         <div class="tbl-wrap">
           <table>
             <thead><tr>
-              <th onclick="sortBy('rent','date')">Date<span class="sort-arrow">&#9650;</span></th>
+              <th onclick="sortBy('rent','submittedAt')">Submitted<span class="sort-arrow">&#9650;</span></th>
+              <th onclick="sortBy('rent','date')">Req. Date<span class="sort-arrow">&#9650;</span></th>
               <th onclick="sortBy('rent','time')">Time<span class="sort-arrow">&#9650;</span></th>
-              <th>Contact</th><th>Event</th><th>Guests</th>
+              <th>Contact</th><th>Event</th>
               <th>Status</th><th>Actions</th>
             </tr></thead>
             <tbody id="rent-body"><tr><td colspan="7" class="empty">Loading&hellip;</td></tr></tbody>
@@ -469,6 +472,39 @@ tr:hover td{background:var(--gold3);cursor:pointer}
         </div>
       </div>
       <div id="cal-container"></div>
+    </div>
+
+
+    <!-- ── DATA TAB ────────────────────────────────────── -->
+    <div class="tab-panel" id="tp-data">
+      <div style="max-width:560px">
+        <div style="margin-bottom:28px">
+          <div style="font-size:10px;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">Export Data</div>
+          <p style="font-size:13px;color:var(--cream5);line-height:1.6;margin-bottom:16px">Download a CSV of all reservations or group rentals. Opens directly in Excel or Google Sheets.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="add-btn" style="padding:10px 20px;font-size:12px" onclick="exportCSV('Reservations')">&#11123; Export Reservations CSV</button>
+            <button class="add-btn" style="padding:10px 20px;font-size:12px" onclick="exportCSV('Group Rentals')">&#11123; Export Group Rentals CSV</button>
+            <button class="add-btn" style="padding:10px 20px;font-size:12px" onclick="exportCSV('Newsletter')">&#11123; Export Newsletter CSV</button>
+          </div>
+        </div>
+        <div style="margin-bottom:28px">
+          <div style="font-size:10px;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">Reset / Archive</div>
+          <p style="font-size:13px;color:var(--cream5);line-height:1.6;margin-bottom:8px">
+            Reset clears <strong style="color:var(--cream)">completed and cancelled</strong> entries from the active view. 
+            Data is <strong style="color:var(--cream)">not permanently deleted</strong> — it moves to an Archive sheet in your spreadsheet.
+          </p>
+          <p style="font-size:12px;color:var(--red);margin-bottom:14px">&#9888; This cannot be undone from the admin panel. Only the spreadsheet owner can restore archived data.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button onclick="archiveData('Reservations')" style="padding:10px 20px;font-size:12px;background:transparent;border:1px solid rgba(200,60,60,.4);border-radius:2px;color:var(--red);cursor:pointer;letter-spacing:.1em;text-transform:uppercase;font-weight:700;transition:all .15s" onmouseover="this.style.background='rgba(200,60,60,.08)'" onmouseout="this.style.background='transparent'">Archive Completed Reservations</button>
+            <button onclick="archiveData('Group Rentals')" style="padding:10px 20px;font-size:12px;background:transparent;border:1px solid rgba(200,60,60,.4);border-radius:2px;color:var(--red);cursor:pointer;letter-spacing:.1em;text-transform:uppercase;font-weight:700;transition:all .15s" onmouseover="this.style.background='rgba(200,60,60,.08)'" onmouseout="this.style.background='transparent'">Archive Completed Rentals</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--gold);letter-spacing:.25em;text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">Sheet Links</div>
+          <p style="font-size:13px;color:var(--cream5);line-height:1.6;margin-bottom:12px">Open the master spreadsheet directly to view or edit raw data.</p>
+          <a href="https://docs.google.com/spreadsheets/d/14DrhHqi7PbK4ELkUtreE0K7W1SH2xn2aqxCtJA3djOA" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:var(--gold3);border:1px solid var(--border);border-radius:2px;font-size:12px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;font-weight:700">&#128196; Open Sulit Master Sheet &#8599;</a>
+        </div>
+      </div>
     </div>
 
   </div><!-- /content -->
@@ -693,10 +729,11 @@ function renderRes(){
     var origIdx=allRes.indexOf(r);
     var st=(r.status||'pending').toLowerCase();
     var name=((r.firstName||'')+(r.lastName?' '+r.lastName:'')).trim()||r.name||'—';
+    var subDate=r.submittedAt?(r.submittedAt.split(',')[0]||r.submittedAt.split(' ')[0]):'—';
     return'<tr onclick="openMod(\'res\','+origIdx+')">'
+      +'<td style="font-size:11px;color:var(--cream5)">'+subDate+'</td>'
       +'<td>'+fmt(r.date)+'</td><td>'+fmt(r.time)+'</td><td>'+name+'</td>'
       +'<td>'+fmt(r.guests)+'</td>'
-      +'<td><a href="tel:'+(r.phone||'')+'" onclick="event.stopPropagation()" style="color:var(--gold)">'+fmt(r.phone)+'</a></td>'
       +'<td><span class="bs bs-'+st+'">'+st+'</span></td>'
       +'<td onclick="event.stopPropagation()">'+rowBtns('res',origIdx,st)+'</td>'
       +'</tr>';
@@ -710,9 +747,11 @@ function renderRent(){
   body.innerHTML=rows.map(function(r){
     var origIdx=allRent.indexOf(r);
     var st=(r.status||'pending').toLowerCase();
+    var subDate=r.submittedAt?(r.submittedAt.split(',')[0]||r.submittedAt.split(' ')[0]):'—';
     return'<tr onclick="openMod(\'rent\','+origIdx+')">'
+      +'<td style="font-size:11px;color:var(--cream5)">'+subDate+'</td>'
       +'<td>'+fmt(r.date)+'</td><td>'+fmt(r.time)+'</td>'
-      +'<td>'+fmt(r.name)+'</td><td>'+fmt(r.eventType)+'</td><td>'+fmt(r.guests)+'</td>'
+      +'<td>'+fmt(r.name)+'</td><td>'+fmt(r.eventType)+'</td>'
       +'<td><span class="bs bs-'+st+'">'+st+'</span></td>'
       +'<td onclick="event.stopPropagation()">'+rowBtns('rent',origIdx,st)+'</td>'
       +'</tr>';
@@ -930,6 +969,8 @@ function openMod(type,idx){
   document.getElementById('mp-details').innerHTML=fields.map(function(f){
     return'<div class="dr"><span class="dl">'+f[0]+'</span><span class="dv">'+f[1]+'</span></div>';
   }).join('');
+  if(r.confirmedDate)document.getElementById('mp-details').innerHTML+='<div class="dr"><span class="dl">Conf. Date</span><span class="dv" style="color:var(--green)">'+r.confirmedDate+(r.confirmedTime?' at '+r.confirmedTime:'')+'</span></div>';
+  if(r.confirmNote)document.getElementById('mp-details').innerHTML+='<div class="dr"><span class="dl">Conf. Note</span><span class="dv">'+r.confirmNote+'</span></div>';
   if(r.completionNotes)document.getElementById('mp-details').innerHTML+='<div class="dr"><span class="dl">Notes</span><span class="dv">'+r.completionNotes+'</span></div>';
   if(r.driveLink)document.getElementById('mp-details').innerHTML+='<div class="dr"><span class="dl">Drive</span><span class="dv"><a href="'+r.driveLink+'" target="_blank">View files &#8599;</a></span></div>';
 
@@ -1132,7 +1173,7 @@ function sendMsg(){
 
 // ── TABS ─────────────────────────────────────────────────
 function switchTab(t){
-  var tabs=['res','rent','cal'];
+  var tabs=['res','rent','cal','data'];
   document.querySelectorAll('.tab').forEach(function(el,i){el.classList.toggle('active',tabs[i]===t);});
   tabs.forEach(function(id){document.getElementById('tp-'+id).classList.toggle('active',id===t);});
   if(t==='cal')renderCal();
@@ -1173,6 +1214,159 @@ window.addEventListener('DOMContentLoaded',function(){
   var theme=localStorage.getItem('sulit_theme');
   if(theme==='light')applyTheme(true);
 });
+
+// ── CONFIRM DIALOG ────────────────────────────────────────
+var pendingConfirmType=null,pendingConfirmIdx=null;
+
+function promptConfirm(type,idx){
+  pendingConfirmType=type;pendingConfirmIdx=idx;
+  var arr=type==='res'?allRes:allRent;
+  var r=arr[idx];if(!r)return;
+  var isRes=type==='res';
+  // Fill in requested details
+  document.getElementById('cf-req-date').textContent=r.date||'—';
+  document.getElementById('cf-req-time').textContent=r.time||'—';
+  document.getElementById('cf-req-guests').textContent=r.guests||'—';
+  var name=isRes?((r.firstName||'')+(r.lastName?' '+r.lastName:'')).trim():r.name||'—';
+  document.getElementById('cf-req-name').textContent=name;
+  // Pre-fill confirmed date/time with requested values
+  document.getElementById('cf-conf-date').value=r.date||todayStr();
+  document.getElementById('cf-note').value='';
+  // Build time options
+  var tSel=document.getElementById('cf-conf-time');
+  tSel.innerHTML=timeOpts(r.time||'');
+  document.getElementById('confirm-overlay').classList.add('open');
+  closeMod();
+}
+
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');}
+
+function doConfirm(){
+  var confDate=document.getElementById('cf-conf-date').value;
+  var confTime=document.getElementById('cf-conf-time').value;
+  var note=document.getElementById('cf-note').value.trim();
+  if(!confDate){toast('Please set a confirmed date','err');return;}
+  if(!confTime){toast('Please set a confirmed time','err');return;}
+  var type=pendingConfirmType,idx=pendingConfirmIdx;
+  var arr=type==='res'?allRes:allRent;
+  var r=arr[idx];if(!r)return;
+  // Save confirmed date/time - keep original requested date for reference
+  r.status='confirmed';
+  r.confirmedDate=confDate;
+  r.confirmedTime=confTime;
+  r.confirmNote=note;
+  var sheet=type==='res'?'Reservations':'Group Rentals';
+  var url=SCRIPT_URL+'?action=confirmEntry'
+    +'&sheet='+encodeURIComponent(sheet)
+    +'&rowId='+encodeURIComponent(r.rowId||r._rowIndex||'')
+    +'&confDate='+encodeURIComponent(confDate)
+    +'&confTime='+encodeURIComponent(confTime)
+    +'&note='+encodeURIComponent(note)
+    +'&updatedBy='+encodeURIComponent(me||'');
+  fetch(url,{method:'GET'})
+    .then(function(res){return res.json();})
+    .then(function(d){toast('Confirmation sent ✓','ok');})
+    .catch(function(){toast('Confirmed locally','ok');});
+  type==='res'?(renderRes(),statsRes(),renderCal()):(renderRent(),statsRent(),renderCal());
+  closeConfirm();
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────
+function exportCSV(sheetName){
+  var arr=sheetName==='Reservations'?allRes:sheetName==='Group Rentals'?allRent:[];
+  if(!arr.length){toast('No data to export','err');return;}
+  // Build CSV from keys of first row
+  var keys=Object.keys(arr[0]).filter(function(k){return k.charAt(0)!=='_';});
+  var rows=[keys.join(',')];
+  arr.forEach(function(r){
+    rows.push(keys.map(function(k){
+      var v=String(r[k]||'').replace(/"/g,'""');
+      return v.indexOf(',')>=0||v.indexOf('"')>=0||v.indexOf('\n')>=0?'"'+v+'"':v;
+    }).join(','));
+  });
+  var csv=rows.join('\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='sulit-'+sheetName.toLowerCase().replace(/ /g,'-')+'-'+todayStr()+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Exported '+arr.length+' rows','ok');
+}
+
+// ── ARCHIVE / RESET ────────────────────────────────────────
+function archiveData(sheetName){
+  if(!confirm('Archive all completed & cancelled entries from '+sheetName+'? They will be moved to an Archive sheet. This cannot be undone from the admin panel.'))return;
+  fetch(SCRIPT_URL+'?action=archiveSheet&sheet='+encodeURIComponent(sheetName)+'&archivedBy='+encodeURIComponent(me||''),{method:'GET'})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      toast(d.archived?d.archived+' entries archived':'Archive complete','ok');
+      setTimeout(loadAll,1000);
+    })
+    .catch(function(){toast('Archive request sent — refresh to confirm','ok');});
+}
+
+// ── MODAL FOOTER BUTTONS (updated for new confirm flow) ────
+function buildModalFoot(type,idx,st){
+  var foot='';
+  if(st==='pending'){
+    foot+='<button class="ab ab-confirm" style="flex:1;padding:11px" onclick="promptConfirm(\''+type+'\','+idx+')">&#10003; Confirm</button>';
+    foot+='<button class="ab ab-cancel" style="flex:1;padding:11px" onclick="setStatus(\''+type+'\','+idx+',\'cancelled\')">&times; Cancel</button>';
+  }
+  if(st==='confirmed'){
+    foot+='<button class="ab ab-complete" style="flex:1;padding:11px;background:rgba(80,120,200,.1)" onclick="promptComplete(\''+type+'\','+idx+')">&#10003; Mark Complete</button>';
+    foot+='<button class="ab ab-cancel" style="flex:1;padding:11px" onclick="setStatus(\''+type+'\','+idx+',\'cancelled\')">&times; Cancel</button>';
+  }
+  if(st!=='cancelled'&&st!=='completed'){
+    // Cancel always available
+  }
+  return foot;
+}
+
 </script>
+
+<!-- CONFIRM DIALOG -->
+<div class="overlay" id="confirm-overlay" onclick="if(event.target===this)closeConfirm()">
+  <div class="modal" style="max-width:460px">
+    <div class="mhdr">
+      <h3>Confirm Reservation</h3>
+      <button class="mclose" onclick="closeConfirm()">&#215;</button>
+    </div>
+    <div class="mpanel active" id="confirm-body">
+      <p style="font-size:13px;color:var(--cream5);margin-bottom:16px;line-height:1.6">
+        Review the requested details below and set the <strong style="color:var(--cream)">confirmed date &amp; time</strong> before sending the confirmation.
+      </p>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:18px">
+        <div style="font-size:10px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px">Requested by guest</div>
+        <div class="dr" style="border-color:rgba(200,146,42,.08)"><span class="dl">Date</span><span class="dv" id="cf-req-date">—</span></div>
+        <div class="dr" style="border-color:rgba(200,146,42,.08)"><span class="dl">Time</span><span class="dv" id="cf-req-time">—</span></div>
+        <div class="dr" style="border-color:rgba(200,146,42,.08)"><span class="dl">Guests</span><span class="dv" id="cf-req-guests">—</span></div>
+        <div class="dr" style="border-bottom:none"><span class="dl">Name</span><span class="dv" id="cf-req-name">—</span></div>
+      </div>
+      <div style="background:var(--gold3);border:1px solid var(--border);border-radius:var(--radius);padding:14px">
+        <div style="font-size:10px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px">Set confirmed date &amp; time</div>
+        <div class="erow">
+          <div class="edit-field">
+            <label>Confirmed date</label>
+            <input type="date" id="cf-conf-date">
+          </div>
+          <div class="edit-field">
+            <label>Confirmed time</label>
+            <select id="cf-conf-time"></select>
+          </div>
+        </div>
+        <div class="edit-field" style="margin-bottom:0">
+          <label>Internal note <span style="color:var(--cream3);font-size:10px;text-transform:lowercase;letter-spacing:0">(optional)</span></label>
+          <input type="text" id="cf-note" placeholder="e.g. Table 4 reserved, birthday setup requested">
+        </div>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="ab ab-cancel" style="flex:1;padding:11px" onclick="closeConfirm()">&times; Keep Pending</button>
+      <button class="ab ab-confirm" style="flex:1;padding:11px;background:rgba(40,160,80,.12)" onclick="doConfirm()">&#10003; Send Confirmation</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
