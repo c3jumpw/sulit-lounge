@@ -82,17 +82,66 @@ a:hover{text-decoration:underline}
   .fwrap{padding:26px 18px 48px}
   .badges{gap:6px}
 }
+
+/* Native select option dark styling */
+.field select{color-scheme:dark}
+.field select option{background:#1C1408;color:#F0E6D3}
+.csel-wrap{position:relative}
+.csel-panel{display:none;position:absolute;top:calc(100% - 1px);left:0;right:0;z-index:9999;
+  background:#1C1408;border:1px solid rgba(200,146,42,0.4);border-top:none;
+  border-radius:0 0 3px 3px;max-height:210px;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(200,146,42,0.3) transparent}
+.csel-panel::-webkit-scrollbar{width:4px}
+.csel-panel::-webkit-scrollbar-thumb{background:rgba(200,146,42,0.3);border-radius:2px}
+.csel-panel.open{display:block}
+.csel-opt{padding:10px 13px;font-family:sans-serif;font-size:14px;
+  color:rgba(240,230,211,0.75);cursor:pointer;transition:background .12s,color .12s;
+  border-bottom:1px solid rgba(200,146,42,0.07)}
+.csel-opt:last-child{border-bottom:none}
+.csel-opt:hover{background:#2A1E0A;color:#F0E6D3}
+.csel-opt.csel-active{color:#C8922A;background:rgba(200,146,42,0.06)}
+.csel-opt.csel-placeholder{color:rgba(240,230,211,0.28)}
+
+@media(max-width:600px){
+  .nav{padding:12px 16px}
+  .nav-logo{height:26px}
+  .nav-back-txt{display:none}
+  .nav-link{padding:6px 10px;font-size:10px;letter-spacing:0.1em}
+  .hero{padding:30px 16px 22px}
+  .hero h1{font-size:22px}
+  .hero p{font-size:13px}
+  .badges{gap:5px}
+  .badge{font-size:10px;padding:4px 8px}
+  .stepper{padding:20px 12px 0}
+  .slabel{font-size:9px}
+  .snum{width:24px;height:24px;font-size:10px}
+  .fwrap{padding:22px 14px 48px}
+  .row{grid-template-columns:1fr !important}
+  .brow{flex-direction:column}
+  .btn{padding:14px;font-size:11px}
+  .scard{padding:12px}
+  .srow{flex-direction:column;gap:2px;padding:8px 0}
+  .svl{text-align:left;max-width:100%}
+  .infobox{padding:10px 12px}
+  .cbfield{padding:10px}
+  .stitle{font-size:9px;letter-spacing:0.2em}
+}
+@media(max-width:380px){
+  .hero h1{font-size:19px}
+  .nav-link{display:none}
+}
+
 </style>
 </head>
 <body>
 
 <nav class="nav">
-  <a href="../" class="nav-back">
+  <a href="https://www.sulitlounge.com" class="nav-back">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-    Back to site
+    <span class="nav-back-txt">Back to site</span>
   </a>
   <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="nav-logo" onerror="this.style.display='none'">
-  <a href="reservations" class="nav-link">Table Reservation</a>
+  <a href="../reservations/" class="nav-link">Table Reservation</a>
 </nav>
 
 <div class="hero">
@@ -119,7 +168,7 @@ a:hover{text-decoration:underline}
   <div class="panel active" id="p1">
     <div class="stitle">Tell us about your event</div>
     <div class="infobox">
-      <p>We accommodate groups of <strong>13 to 50+ guests</strong>. For smaller parties, use our <a href="reservations">standard reservation form</a>.</p>
+      <p>We accommodate groups of <strong>13 to 50+ guests</strong>. For smaller parties, use our <a href="../reservations/">standard reservation form</a>.</p>
     </div>
     <div class="field">
       <label>Type of event</label>
@@ -396,6 +445,68 @@ document.getElementById('e-date').min = today;
 document.getElementById('e-date').value = today;
 var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
 document.getElementById('e-altdate').min = tomorrow.toISOString().split('T')[0];
+
+function buildCustomSelects(){
+  document.querySelectorAll('.field select').forEach(function(sel){
+    if(sel.getAttribute('data-custom'))return;
+    sel.setAttribute('data-custom','1');
+    var wrap=document.createElement('div');
+    wrap.className='csel-wrap';
+    sel.parentNode.insertBefore(wrap,sel);
+    wrap.appendChild(sel);
+    sel.style.display='none';
+    var display=document.createElement('div');
+    display.style.cssText='width:100%;background:rgba(255,255,255,0.025);border:1px solid rgba(200,146,42,0.18);border-radius:3px;color:#F0E6D3;font-family:sans-serif;font-size:14px;padding:11px 13px;cursor:pointer;position:relative;user-select:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C8922A'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;transition:border-color .2s;';
+    var panel=document.createElement('div');
+    panel.className='csel-panel';
+    wrap.appendChild(display);
+    wrap.appendChild(panel);
+    function syncDisplay(){
+      var opt=sel.options[sel.selectedIndex];
+      display.textContent=opt?opt.text:'';
+      display.style.color=opt&&opt.value?'#F0E6D3':'rgba(240,230,211,0.32)';
+    }
+    function buildOpts(){
+      panel.innerHTML='';
+      Array.from(sel.options).forEach(function(opt,i){
+        var d=document.createElement('div');
+        d.className='csel-opt'+(i===sel.selectedIndex?' csel-active':'')+(!opt.value?' csel-placeholder':'');
+        d.textContent=opt.text;
+        d.addEventListener('mousedown',function(ev){
+          ev.preventDefault();
+          sel.selectedIndex=i;
+          sel.dispatchEvent(new Event('change',{bubbles:true}));
+          syncDisplay();
+          closePanel();
+          panel.querySelectorAll('.csel-opt').forEach(function(x,j){x.classList.toggle('csel-active',j===i);});
+        });
+        panel.appendChild(d);
+      });
+    }
+    function openPanel(){
+      document.querySelectorAll('.csel-panel.open').forEach(function(p){p.classList.remove('open');});
+      buildOpts();
+      panel.classList.add('open');
+      display.style.borderColor='#C8922A';
+      display.style.borderBottomLeftRadius='0';
+      display.style.borderBottomRightRadius='0';
+    }
+    function closePanel(){
+      panel.classList.remove('open');
+      display.style.borderColor='rgba(200,146,42,0.18)';
+      display.style.borderBottomLeftRadius='3px';
+      display.style.borderBottomRightRadius='3px';
+    }
+    display.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      panel.classList.contains('open')?closePanel():openPanel();
+    });
+    document.addEventListener('click',closePanel);
+    syncDisplay();
+  });
+}
+document.addEventListener('DOMContentLoaded',buildCustomSelects);
+
 </script>
 </body>
 </html>
