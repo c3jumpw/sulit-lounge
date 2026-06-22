@@ -607,20 +607,16 @@ function doAuth(){
   var member=document.getElementById('member-sel').value;
   if(!member){setMsg('Please select your name first.','err');pin='';syncDots();return;}
   setMsg('Verifying\u2026','info');
-  fetch(SCRIPT_URL+'?action=auth&member='+encodeURIComponent(member)+'&pin='+encodeURIComponent(pin),{method:'GET'})
-    .then(function(r){return r.json();})
-    .then(function(data){
+  gasGet({action:'auth',member:member,pin:pin},function(data){
       if(data.ok){me=member;sessionStorage.setItem('sulit_admin',member);enterDashboard(member);}
       else if(data.error&&data.error.indexOf('Admin Users')>=0){setMsg('Admin Users sheet not found — see setup notice.','err');document.getElementById('setup-notice').style.display='block';pin='';syncDots();}
       else{setMsg('Incorrect passcode. Try again.','err');shakeDots();pin='';syncDots();}
     })
-    .catch(function(){setMsg('Cannot reach server. Check script deployment.','err');document.getElementById('setup-notice').style.display='block';pin='';syncDots();});
+  });
 }
 
 function loadTeam(){
-  fetch(SCRIPT_URL+'?action=getMembers',{method:'GET'})
-    .then(function(r){return r.json();})
-    .then(function(data){
+  gasGet({action:'getMembers'},function(data){
       var sel=document.getElementById('member-sel');
       sel.style.color='';
       if(data.members&&data.members.length){
@@ -632,11 +628,12 @@ function loadTeam(){
         setMsg('Admin Users sheet missing or empty — see setup notice.','err');
         document.getElementById('setup-notice').style.display='block';
       }
-    }).catch(function(){
+    if(!data||data.error){
       document.getElementById('member-sel').innerHTML='<option value="">Could not load team</option>';
       setMsg('Could not reach script — see setup notice.','err');
       document.getElementById('setup-notice').style.display='block';
-    });
+    }
+  });
 }
 
 // ── DASHBOARD ────────────────────────────────────────────
@@ -670,10 +667,30 @@ function loadAll(){
   loadSheet('Group Rentals',function(rows){allRent=rows;renderRent();statsRent();renderCal();});
 }
 function loadSheet(name,cb){
-  fetch(SCRIPT_URL+'?action=getData&sheet='+encodeURIComponent(name),{method:'GET'})
-    .then(function(r){return r.json();})
-    .then(function(d){cb(d.rows||[]);})
-    .catch(function(){cb([]);});
+  gasGet({action:'getData',sheet:name},function(d){cb((d&&d.rows)||[]);});
+}
+
+// GAS-compatible GET request — handles Google's redirect chain
+function gasGet(params,cb){
+  var qs=Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
+  var url=SCRIPT_URL+'?'+qs;
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET',url,true);
+  xhr.onload=function(){
+    if(xhr.status>=200&&xhr.status<400){
+      try{var d=JSON.parse(xhr.responseText);cb(d);}
+      catch(e){console.error('Parse error:',xhr.responseText.substring(0,200));cb(null);}
+    }else{
+      console.error('XHR error:',xhr.status,xhr.statusText);cb(null);
+    }
+  };
+  xhr.onerror=function(){console.error('XHR network error for:',url);cb(null);};
+  xhr.send();
+}
+
+// GAS POST (no-cors fire-and-forget)
+function gasPost(payload){
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
 }
 
 // ── FILTER + SEARCH ──────────────────────────────────────
@@ -1048,12 +1065,7 @@ function saveEdit(){
     r.email=document.getElementById('ef-email').value;
     r.notes=document.getElementById('ef-notes').value;
   }
-  fetch(SCRIPT_URL+'?action=updateRecord'
-    +'&sheet='+encodeURIComponent(modType==='res'?'Reservations':'Group Rentals')
-    +'&rowId='+encodeURIComponent(r.rowId||r._rowIndex||'')
-    +'&data='+encodeURIComponent(JSON.stringify(r)),{method:'GET'})
-    .then(function(){toast('Changes saved','ok');modType==='res'?(renderRes(),renderCal()):(renderRent(),renderCal());switchMTab('details');openMod(modType,modIdx);})
-    .catch(function(){toast('Saved locally (sync on refresh)','ok');modType==='res'?(renderRes(),renderCal()):(renderRent(),renderCal());switchMTab('details');});
+  gasGet({action:'updateRecord',sheet:modType==='res'?'Reservations':'Group Rentals',rowId:r.rowId||r._rowIndex||'',data:JSON.stringify(r)},function(d){toast('Changes saved','ok');modType==='res'?(renderRes(),renderCal()):(renderRent(),renderCal());switchMTab('details');openMod(modType,modIdx);})modType==='res'?(renderRes(),renderCal()):(renderRent(),renderCal());switchMTab('details');});
 }
 
 // ── STATUS UPDATE ────────────────────────────────────────
@@ -1061,10 +1073,7 @@ function setStatus(type,idx,newSt){
   var arr=type==='res'?allRes:allRent;
   var r=arr[idx];if(!r)return;
   r.status=newSt;
-  var url=SCRIPT_URL+'?action=updateStatus&sheet='+encodeURIComponent(type==='res'?'Reservations':'Group Rentals')
-    +'&rowId='+encodeURIComponent(r.rowId||r._rowIndex||'')
-    +'&status='+encodeURIComponent(newSt)+'&updatedBy='+encodeURIComponent(me||'');
-  fetch(url,{method:'GET'}).then(function(){toast('Status \u2192 '+newSt,'ok');}).catch(function(){toast('Updated locally','ok');});
+  gasGet({action:'updateStatus',sheet:type==='res'?'Reservations':'Group Rentals',rowId:r.rowId||r._rowIndex||'',status:newSt,updatedBy:me||''},function(d){toast('Status \u2192 '+newSt,'ok');});
   type==='res'?(renderRes(),statsRes(),renderCal()):(renderRent(),statsRent(),renderCal());
   closeMod();
 }
@@ -1086,11 +1095,7 @@ function confirmComplete(){
   r.status='completed';
   r.completionNotes=notes;
   r.driveLink=driveLink;
-  var url=SCRIPT_URL+'?action=updateStatus&sheet='+encodeURIComponent(pendingCompleteType==='res'?'Reservations':'Group Rentals')
-    +'&rowId='+encodeURIComponent(r.rowId||r._rowIndex||'')
-    +'&status=completed&notes='+encodeURIComponent(notes)+'&driveLink='+encodeURIComponent(driveLink)
-    +'&updatedBy='+encodeURIComponent(me||'');
-  fetch(url,{method:'GET'}).then(function(){toast('Marked as completed \u2713','ok');}).catch(function(){toast('Completed locally','ok');});
+  gasGet({action:'updateStatus',sheet:pendingCompleteType==='res'?'Reservations':'Group Rentals',rowId:r.rowId||r._rowIndex||'',status:'completed',notes:notes,driveLink:driveLink,updatedBy:me||''},function(d){toast('Marked as completed ✓','ok');});
   pendingCompleteType==='res'?(renderRes(),statsRes(),renderCal()):(renderRent(),statsRent(),renderCal());
   closeComplete();
 }
@@ -1151,9 +1156,7 @@ function saveNewEntry(){
     entry.email=document.getElementById('add-email').value;
     entry.notes=document.getElementById('add-notes').value;
   }
-  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)})
-    .then(function(){toast('Entry added','ok');closeAddModal();setTimeout(loadAll,1500);})
-    .catch(function(){toast('Saved — refresh to sync','ok');closeAddModal();});
+  gasPost(entry);toast('Entry added','ok');closeAddModal();setTimeout(loadAll,2000);
   // Optimistically add to local array
   if(isRes)allRes.unshift(entry);else allRent.unshift(entry);
   isRes?(renderRes(),statsRes()):(renderRent(),statsRent());
@@ -1167,8 +1170,7 @@ function sendMsg(){
   var name=qm.getAttribute('data-name');
   var body=qm.value.trim();
   if(!body){toast('Please type a message','');return;}
-  var url=SCRIPT_URL+'?action=sendMessage&to='+encodeURIComponent(email)+'&name='+encodeURIComponent(name)+'&body='+encodeURIComponent(body)+'&from='+encodeURIComponent(me||'Sulit Team');
-  fetch(url,{method:'GET'}).then(function(){toast('Message sent to '+email,'ok');qm.value='';}).catch(function(){toast('Could not send','err');});
+  gasGet({action:'sendMessage',to:email,name:name,body:body,from:me||'Sulit Team'},function(d){toast(d&&d.ok?'Message sent to '+email:'Could not send','ok');if(qm)qm.value='';});
 }
 
 // ── TABS ─────────────────────────────────────────────────
@@ -1256,17 +1258,7 @@ function doConfirm(){
   r.confirmedTime=confTime;
   r.confirmNote=note;
   var sheet=type==='res'?'Reservations':'Group Rentals';
-  var url=SCRIPT_URL+'?action=confirmEntry'
-    +'&sheet='+encodeURIComponent(sheet)
-    +'&rowId='+encodeURIComponent(r.rowId||r._rowIndex||'')
-    +'&confDate='+encodeURIComponent(confDate)
-    +'&confTime='+encodeURIComponent(confTime)
-    +'&note='+encodeURIComponent(note)
-    +'&updatedBy='+encodeURIComponent(me||'');
-  fetch(url,{method:'GET'})
-    .then(function(res){return res.json();})
-    .then(function(d){toast('Confirmation sent ✓','ok');})
-    .catch(function(){toast('Confirmed locally','ok');});
+  gasGet({action:'confirmEntry',sheet:sheet,rowId:r.rowId||r._rowIndex||'',confDate:confDate,confTime:confTime,note:note,updatedBy:me||''},function(d){toast('Confirmation sent ✓','ok');});
   type==='res'?(renderRes(),statsRes(),renderCal()):(renderRent(),statsRent(),renderCal());
   closeConfirm();
 }
@@ -1297,13 +1289,10 @@ function exportCSV(sheetName){
 // ── ARCHIVE / RESET ────────────────────────────────────────
 function archiveData(sheetName){
   if(!confirm('Archive all completed & cancelled entries from '+sheetName+'? They will be moved to an Archive sheet. This cannot be undone from the admin panel.'))return;
-  fetch(SCRIPT_URL+'?action=archiveSheet&sheet='+encodeURIComponent(sheetName)+'&archivedBy='+encodeURIComponent(me||''),{method:'GET'})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      toast(d.archived?d.archived+' entries archived':'Archive complete','ok');
-      setTimeout(loadAll,1000);
-    })
-    .catch(function(){toast('Archive request sent — refresh to confirm','ok');});
+  gasGet({action:'archiveSheet',sheet:sheetName,archivedBy:me||''},function(d){
+    toast(d&&d.archived?d.archived+' entries archived':'Archive complete','ok');
+    setTimeout(loadAll,1000);
+  });
 }
 
 // ── MODAL FOOTER BUTTONS (updated for new confirm flow) ────
