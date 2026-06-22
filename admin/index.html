@@ -259,10 +259,9 @@ tr:hover td{background:rgba(200,146,42,0.025)}
     <div class="login-status info" id="login-msg">Select your name to begin</div>
 
     <div class="setup-notice" id="setup-notice">
-      <strong>Setup needed:</strong> The Apps Script needs to be updated before login works.
-      Replace the script code with <strong>sulit-apps-script-v2.gs</strong> and redeploy as a
-      new version. Make sure the <strong>Team</strong> sheet tab exists with Name / Passcode /
-      Role / Active columns.
+      <strong>Action needed:</strong> Replace the Apps Script code with the updated
+      <strong>sulit-apps-script-v2.gs</strong>, then click <strong>Deploy &rarr; Manage deployments &rarr; Edit &rarr; New version &rarr; Deploy</strong>.
+      Your <strong>Admin Users</strong> sheet already has the right structure &mdash; no changes needed there.
     </div>
   </div>
 </div>
@@ -424,8 +423,8 @@ function doAuth() {
         me = member;
         sessionStorage.setItem('sulit_admin', member);
         enterDashboard(member);
-      } else if (data.error && data.error.indexOf('Team sheet') >= 0) {
-        setMsg('Team sheet not found — see setup notice below.', 'err');
+      } else if (data.error && data.error.indexOf('Admin Users') >= 0) {
+        setMsg('Admin Users sheet missing or empty — see setup notice below.', 'err');
         document.getElementById('setup-notice').style.display = 'block';
         pin = ''; syncDots();
       } else {
@@ -459,7 +458,7 @@ function loadTeam() {
         setMsg('Select your name to begin', 'info');
       } else {
         sel.innerHTML = '<option value="">No team members found</option>';
-        setMsg('Team sheet missing or empty — see setup notice.', 'err');
+        setMsg('Admin Users sheet missing or empty — see setup notice.', 'err');
         document.getElementById('setup-notice').style.display = 'block';
       }
     })
