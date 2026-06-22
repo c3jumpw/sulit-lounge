@@ -1,1 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join the Sulit Inner Circle — Sulit Lounge</title>
+<meta name="description" content="Sign up for the Sulit Lounge newsletter and get exclusive offers, event invites, and specials before anyone else.">
+<link rel="icon" type="image/png" href="../media/favi.png">
+<link rel="apple-touch-icon" href="../media/apple.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh;font-family:sans-serif;color:#F0E6D3;background:#09080A;overflow-x:hidden}
 
+/* ── PAGE LAYOUT ────────────────────────────────────────── */
+.page{min-height:100vh;display:flex;flex-direction:column}
+
+/* ── NAV ────────────────────────────────────────────────── */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid rgba(200,146,42,0.18)}
+.nav-logo{height:32px;object-fit:contain}
+.nav-back{display:flex;align-items:center;gap:6px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(240,230,211,0.45);text-decoration:none;transition:color .18s}
+.nav-back:hover{color:#C8922A}
+.nav-back-txt{display:inline}
+
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{text-align:center;padding:56px 24px 40px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(200,146,42,0.07) 0%, transparent 70%);pointer-events:none}
+.hero-eyebrow{color:#C8922A;letter-spacing:0.35em;font-size:11px;text-transform:uppercase;font-weight:600;margin-bottom:14px}
+.hero h1{font-family:Georgia,serif;font-size:34px;font-weight:400;color:#F0E6D3;letter-spacing:0.04em;margin-bottom:14px;line-height:1.25}
+.hero h1 em{font-style:italic;color:#C8922A}
+.hero-sub{color:rgba(240,230,211,0.5);font-size:15px;line-height:1.7;max-width:420px;margin:0 auto 28px}
+
+/* PERKS ROW */
+.perks{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:0}
+.perk{display:flex;align-items:center;gap:6px;background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.16);border-radius:2px;padding:6px 12px;font-size:12px;color:rgba(240,230,211,0.65);letter-spacing:0.04em}
+.perk-icon{color:#C8922A;font-size:13px;flex-shrink:0}
+
+/* ── GOLD DIVIDER ───────────────────────────────────────── */
+.gold-div{display:flex;align-items:center;gap:14px;max-width:480px;margin:32px auto;padding:0 24px}
+.gold-div::before,.gold-div::after{content:'';flex:1;height:1px;background:rgba(200,146,42,0.2)}
+.gold-div span{color:#C8922A;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;white-space:nowrap}
+
+/* ── FORM CARD ──────────────────────────────────────────── */
+.form-wrap{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:0 24px 64px}
+.card{background:#110D08;border:1px solid rgba(200,146,42,0.2);border-radius:6px;padding:36px 32px;width:100%;max-width:480px}
+
+/* FIELDS */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;color:rgba(240,230,211,0.48);letter-spacing:0.13em;text-transform:uppercase;margin-bottom:7px}
+.req{color:#C8922A;margin-left:2px}
+.field input{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(200,146,42,0.18);border-radius:3px;color:#F0E6D3;font-family:sans-serif;font-size:15px;padding:13px 14px;outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none}
+.field input:focus{border-color:#C8922A;background:rgba(200,146,42,0.03)}
+.field input::placeholder{color:rgba(240,230,211,0.22);font-size:14px}
+.field input.err{border-color:rgba(200,70,50,0.55);background:rgba(200,70,50,0.03)}
+.errmsg{color:rgba(210,90,70,0.9);font-size:11px;margin-top:5px}
+
+/* SMS OPT-IN */
+.sms-block{background:rgba(200,146,42,0.04);border:1px solid rgba(200,146,42,0.14);border-radius:3px;padding:14px;margin-bottom:20px}
+.sms-check{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.sms-check input[type=checkbox]{width:16px;height:16px;flex-shrink:0;accent-color:#C8922A;margin-top:2px;cursor:pointer}
+.sms-check-label{font-size:13px;color:rgba(240,230,211,0.6);line-height:1.6;cursor:pointer}
+.sms-check-label a{color:#C8922A;text-decoration:none}
+.sms-check-label a:hover{text-decoration:underline}
+.sms-fine{margin-top:10px;padding-top:10px;border-top:1px solid rgba(200,146,42,0.1);font-size:11px;color:rgba(240,230,211,0.32);line-height:1.6;list-style:none}
+.sms-fine li{padding:1px 0}
+.sms-fine li::before{content:'· ';color:rgba(200,146,42,0.4)}
+
+/* SUBMIT */
+.submit-btn{width:100%;padding:15px;background:#C8922A;color:#09080A;border:none;border-radius:3px;font-family:sans-serif;font-size:13px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:background .18s,opacity .18s;position:relative;overflow:hidden}
+.submit-btn:hover{background:#d9a03c}
+.submit-btn:disabled{opacity:0.55;cursor:not-allowed}
+.submit-btn .btn-loading{display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:#C8922A}
+.submit-btn.loading .btn-text{opacity:0}
+.submit-btn.loading .btn-loading{display:flex}
+
+/* FINE PRINT */
+.fine-print{margin-top:18px;font-size:11px;color:rgba(240,230,211,0.28);line-height:1.6;text-align:center}
+.fine-print a{color:rgba(200,146,42,0.6);text-decoration:none}
+.fine-print a:hover{color:#C8922A;text-decoration:underline}
+
+/* ── SUCCESS ─────────────────────────────────────────────── */
+#success-screen{display:none;text-align:center;padding:64px 24px}
+.success-icon{width:64px;height:64px;border-radius:50%;background:rgba(200,146,42,0.1);border:1px solid rgba(200,146,42,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:26px;color:#C8922A}
+.success-icon svg{width:28px;height:28px;stroke:#C8922A;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+#success-screen h2{font-family:Georgia,serif;font-size:26px;font-weight:400;color:#F0E6D3;margin-bottom:12px}
+#success-screen p{color:rgba(240,230,211,0.5);font-size:15px;line-height:1.7;max-width:360px;margin:0 auto}
+.success-div{border:none;border-top:1px solid rgba(200,146,42,0.15);max-width:280px;margin:28px auto}
+.success-logo{height:30px;display:block;margin:0 auto 6px;opacity:0.45}
+.success-email{font-size:12px;color:rgba(240,230,211,0.28);letter-spacing:0.05em}
+
+/* ── FOOTER ─────────────────────────────────────────────── */
+.footer{text-align:center;padding:24px;border-top:1px solid rgba(200,146,42,0.1);font-size:11px;color:rgba(240,230,211,0.25);letter-spacing:0.06em}
+
+/* ── MOBILE ─────────────────────────────────────────────── */
+@media(max-width:560px){
+  .nav{padding:12px 16px}
+  .nav-logo{height:26px}
+  .nav-back-txt{display:none}
+  .hero{padding:40px 18px 28px}
+  .hero h1{font-size:26px}
+  .hero-sub{font-size:14px}
+  .perks{gap:6px}
+  .perk{font-size:11px;padding:5px 10px}
+  .gold-div{margin:24px auto}
+  .form-wrap{padding:0 14px 48px}
+  .card{padding:26px 20px}
+  .field input{font-size:14px;padding:12px 13px}
+  .submit-btn{padding:14px}
+}
+@media(max-width:360px){
+  .hero h1{font-size:22px}
+  .perks{flex-direction:column;align-items:center}
+}
+
+/* ── JOIN PAGE MOBILE COMPREHENSIVE FIX ─────────────── */
+@media(max-width:768px){
+  .field input{font-size:16px!important}
+  #f-email,#f-name,#f-phone{font-size:16px!important}
+}
+@media(max-width:480px){
+  .hero{padding:36px 16px 24px}
+  .hero h1{font-size:26px}
+  .hero-sub{font-size:13px}
+  .perks{gap:6px}
+  .perk{font-size:11px;padding:5px 9px}
+  .gold-div{margin:20px auto;padding:0 16px}
+  .form-wrap{padding:0 12px 48px}
+  .card{padding:24px 18px}
+  .field input{padding:14px 13px;min-height:48px}
+  .submit-btn{min-height:52px;font-size:12px;letter-spacing:0.15em}
+  .sms-check-label{font-size:12px}
+  .sms-fine{font-size:11px}
+}
+@media(max-width:360px){
+  .hero h1{font-size:22px}
+  .perks{flex-direction:column;align-items:center}
+  .nav-link{display:none}
+  .card{padding:20px 14px}
+  .fine-print{font-size:10px}
+  .sms-check-label{font-size:11px}
+}
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="https://www.sulitlounge.com" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+      <span class="nav-back-txt">Back to site</span>
+    </a>
+    <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="nav-logo"
+         onerror="this.style.display='none'">
+    <a href="../reservations/" style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#C8922A;padding:7px 14px;border:1px solid rgba(200,146,42,0.32);border-radius:2px;text-decoration:none">Reserve &rarr;</a>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero" id="hero-section">
+    <div class="hero-eyebrow">Sulit Lounge &nbsp;&middot;&nbsp; Alpharetta, GA</div>
+    <h1>Join the<br><em>Inner Circle</em></h1>
+    <p class="hero-sub">Sign up for exclusive offers, event invites, and specials not available to the general public.</p>
+    <div class="perks">
+      <div class="perk"><span class="perk-icon">&#9733;</span> Early event access</div>
+      <div class="perk"><span class="perk-icon">&#9733;</span> Exclusive specials</div>
+      <div class="perk"><span class="perk-icon">&#9733;</span> Private invites</div>
+    </div>
+  </div>
+
+  <div class="gold-div"><span>Sign up below</span></div>
+
+  <!-- FORM -->
+  <div class="form-wrap" id="form-section">
+    <div class="card">
+
+      <div class="field">
+        <label>Email address <span class="req">*</span></label>
+        <input type="email" id="f-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label>First name <span class="req">*</span></label>
+        <input type="text" id="f-name" placeholder="e.g. Nina" autocomplete="given-name">
+      </div>
+
+      <div class="field">
+        <label>Phone number <span style="color:rgba(240,230,211,0.28);font-size:10px;text-transform:lowercase;letter-spacing:0">(optional)</span></label>
+        <input type="tel" id="f-phone" placeholder="(404) 555-0100" autocomplete="tel">
+      </div>
+
+      <!-- SMS OPT-IN -->
+      <div class="sms-block">
+        <label class="sms-check">
+          <input type="checkbox" id="f-sms">
+          <span class="sms-check-label">
+            I&rsquo;d like to get texts about specials, events, and exclusive offers and announcements
+            not available to the general public.
+            <a href="https://www.sulitlounge.com/privacy-policy" target="_blank">Privacy Policy</a> &nbsp;
+            <a href="https://www.sulitlounge.com/terms" target="_blank">Terms &amp; Conditions</a>
+          </span>
+        </label>
+        <ul class="sms-fine">
+          <li>Message and data rates may apply.</li>
+          <li>Message frequency varies.</li>
+          <li>Reply STOP to unsubscribe at any time.</li>
+        </ul>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+        <span class="btn-text">Join the Inner Circle</span>
+        <span class="btn-loading">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#09080A" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/></path></svg>
+        </span>
+      </button>
+
+      <div class="fine-print">
+        By joining you agree to receive marketing emails from Sulit Lounge.
+        You can unsubscribe at any time. We never share your information.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="success-screen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>You&rsquo;re in.</h2>
+    <p>Welcome to the Sulit Inner Circle. Keep an eye on your inbox &mdash; exclusive offers and event invites are coming your way.</p>
+    <hr class="success-div">
+    <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="success-logo"
+         onerror="this.style.display='none'">
+    <div class="success-email">sulitlounge@gmail.com</div>
+  </div>
+
+  <div class="footer">
+    &copy; 2026 Sulit Lounge &nbsp;&middot;&nbsp; Alpharetta, GA &nbsp;&middot;&nbsp;
+    <a href="https://www.sulitlounge.com/privacy-policy" style="color:rgba(200,146,42,0.45);text-decoration:none">Privacy</a>
+  </div>
+
+</div>
+
+<script>
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzujLbZ7-o84n312UW5MuXorsEROWLlhUllWO2_Soz4yKMsTtOGCXB1sbxpzNmTfnqgiQ/exec';
+
+function submitForm() {
+  var email = document.getElementById('f-email').value.trim();
+  var name  = document.getElementById('f-name').value.trim();
+  var phone = document.getElementById('f-phone').value.trim();
+  var sms   = document.getElementById('f-sms').checked;
+
+  // Clear old errors
+  clearErr('f-email'); clearErr('f-name');
+
+  // Validate
+  var ok = true;
+  if (!email || email.indexOf('@') < 0) { markErr('f-email', 'Please enter a valid email address'); ok = false; }
+  if (!name) { markErr('f-name', 'Please enter your first name'); ok = false; }
+  if (!ok) return;
+
+  // Loading state
+  var btn = document.getElementById('submit-btn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  var payload = {
+    type: 'newsletter',
+    email: email,
+    name: name,
+    phone: phone,
+    smsConsent: sms ? 'Yes' : 'No',
+    submittedAt: new Date().toLocaleString('en-US', {timeZone: 'America/New_York'})
+  };
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function() {
+    showSuccess();
+  }).catch(function() {
+    showSuccess(); // show success regardless — no-cors can't read response
+  });
+}
+
+function showSuccess() {
+  document.getElementById('hero-section').style.display = 'none';
+  document.getElementById('form-section').style.display = 'none';
+  document.querySelector('.gold-div').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+}
+
+function markErr(id, msg) {
+  var el = document.getElementById(id);
+  el.classList.add('err');
+  var prev = el.parentNode.querySelector('.errmsg');
+  if (prev) prev.remove();
+  var e = document.createElement('div');
+  e.className = 'errmsg'; e.textContent = msg;
+  el.parentNode.appendChild(e);
+  el.addEventListener('input', function() { clearErr(id); }, {once: true});
+}
+
+function clearErr(id) {
+  var el = document.getElementById(id);
+  el.classList.remove('err');
+  var m = el.parentNode.querySelector('.errmsg');
+  if (m) m.remove();
+}
+</script>
+</body>
+</html>
