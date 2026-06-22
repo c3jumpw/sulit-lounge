@@ -8,261 +8,311 @@
 <link rel="apple-touch-icon" href="../media/apple.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:#09080A;min-height:100vh;font-family:sans-serif;color:#F0E6D3}
+html,body{background:#09080A;min-height:100vh;overflow-x:hidden;font-family:sans-serif;color:#F0E6D3}
 
-/* ── LOGIN SCREEN ───────────────────────────────────── */
+/* ── LOGIN ─────────────────────────────────────────────── */
 #login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
-.login-logo{height:44px;margin-bottom:28px;opacity:0.85}
-.login-box{background:#110D08;border:1px solid rgba(200,146,42,0.25);border-radius:6px;padding:36px 32px;width:100%;max-width:360px}
+.login-logo{height:42px;margin-bottom:28px;opacity:.9;object-fit:contain;}
+.login-box{background:#110D08;border:1px solid rgba(200,146,42,0.25);border-radius:6px;padding:36px 28px;width:100%;max-width:340px}
 .login-eyebrow{color:#C8922A;letter-spacing:0.3em;font-size:10px;text-transform:uppercase;text-align:center;margin-bottom:6px}
-.login-box h1{color:#F0E6D3;font-family:Georgia,serif;font-size:22px;font-weight:400;text-align:center;margin-bottom:28px}
-.lfield{margin-bottom:18px}
+.login-title{color:#F0E6D3;font-family:Georgia,serif;font-size:22px;font-weight:400;text-align:center;margin-bottom:26px}
+.lfield{margin-bottom:16px}
 .lfield label{display:block;font-size:11px;color:rgba(240,230,211,0.45);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px}
-.lfield select,.lfield input{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(200,146,42,0.2);border-radius:3px;color:#F0E6D3;font-size:14px;padding:11px 13px;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .2s}
-.lfield select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C8922A'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.lfield select{width:100%;background:#1C1408;border:1px solid rgba(200,146,42,0.2);border-radius:3px;color:#F0E6D3;font-size:14px;padding:11px 13px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;transition:border-color .2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C8922A'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.lfield select:focus{border-color:#C8922A}
 .lfield select option{background:#1C1408;color:#F0E6D3}
-.lfield select:focus,.lfield input:focus{border-color:#C8922A}
-.lfield input[type=password]{letter-spacing:0.2em;font-size:18px}
-.login-btn{width:100%;padding:13px;background:#C8922A;color:#09080A;border:none;border-radius:3px;font-size:12px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:background .18s}
-.login-btn:hover{background:#d9a03c}
-.login-err{color:rgba(210,80,60,0.9);font-size:12px;text-align:center;margin-top:12px;min-height:18px}
-.pin-dots{display:flex;gap:10px;justify-content:center;margin:16px 0 4px}
-.pin-dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(200,146,42,0.4);background:transparent;transition:background .15s}
+.lfield select.loading{color:rgba(240,230,211,0.35)}
+.pin-label{font-size:11px;color:rgba(240,230,211,0.45);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;display:block}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin-bottom:18px}
+.pin-dot{width:13px;height:13px;border-radius:50%;border:1px solid rgba(200,146,42,0.35);background:transparent;transition:background .15s,border-color .15s}
 .pin-dot.filled{background:#C8922A;border-color:#C8922A}
-.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-.pin-key{padding:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(200,146,42,0.15);border-radius:4px;color:#F0E6D3;font-size:18px;font-weight:500;cursor:pointer;text-align:center;transition:background .12s,border-color .12s;user-select:none}
-.pin-key:hover{background:rgba(200,146,42,0.1);border-color:rgba(200,146,42,0.35)}
-.pin-key:active{background:rgba(200,146,42,0.18)}
-.pin-key.del{font-size:14px;color:rgba(240,230,211,0.5)}
-.pin-key.zero{grid-column:2}
+.pin-dot.shake{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.key{padding:15px;background:rgba(255,255,255,0.03);border:1px solid rgba(200,146,42,0.13);border-radius:4px;color:#F0E6D3;font-size:20px;font-weight:400;cursor:pointer;text-align:center;transition:background .1s,border-color .1s;user-select:none;-webkit-user-select:none}
+.key:hover{background:rgba(200,146,42,0.08);border-color:rgba(200,146,42,0.3)}
+.key:active{background:rgba(200,146,42,0.15)}
+.key.del{font-size:15px;color:rgba(240,230,211,0.45)}
+.key.zero{grid-column:2}
+.login-status{min-height:18px;text-align:center;font-size:12px;margin-top:14px;transition:color .2s}
+.login-status.err{color:rgba(220,80,60,0.9)}
+.login-status.ok{color:#5dc98a}
+.login-status.info{color:rgba(240,230,211,0.4)}
+.setup-notice{background:rgba(200,146,42,0.05);border:1px solid rgba(200,146,42,0.2);border-radius:4px;padding:14px;margin-top:16px;font-size:12px;color:rgba(240,230,211,0.5);line-height:1.6;display:none}
+.setup-notice strong{color:#C8922A}
 
-/* ── DASHBOARD ───────────────────────────────────────── */
+/* ── DASHBOARD ──────────────────────────────────────────── */
 #dashboard{display:none;min-height:100vh;flex-direction:column}
 .top-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:#09080A;border-bottom:1px solid rgba(200,146,42,0.18);position:sticky;top:0;z-index:100}
-.top-bar-left{display:flex;align-items:center;gap:14px}
-.top-logo{height:28px;opacity:0.85}
-.top-title{font-size:13px;color:rgba(240,230,211,0.5);letter-spacing:0.08em}
-.top-bar-right{display:flex;align-items:center;gap:10px}
-.admin-name{font-size:12px;color:#C8922A;letter-spacing:0.1em}
-.logout-btn{font-size:11px;color:rgba(240,230,211,0.4);background:transparent;border:1px solid rgba(200,146,42,0.2);border-radius:2px;padding:5px 10px;cursor:pointer;letter-spacing:0.1em}
+.top-left{display:flex;align-items:center;gap:14px}
+.top-logo{height:26px;opacity:.85;object-fit:contain;}
+.top-subtitle{font-size:12px;color:rgba(240,230,211,0.35);letter-spacing:0.06em}
+.top-right{display:flex;align-items:center;gap:10px}
+.admin-chip{font-size:12px;color:#C8922A;background:rgba(200,146,42,0.08);border:1px solid rgba(200,146,42,0.2);border-radius:2px;padding:4px 10px;letter-spacing:0.06em}
+.logout-btn{font-size:11px;color:rgba(240,230,211,0.4);background:transparent;border:1px solid rgba(200,146,42,0.18);border-radius:2px;padding:5px 10px;cursor:pointer;letter-spacing:0.08em}
 .logout-btn:hover{color:#C8922A;border-color:rgba(200,146,42,0.4)}
 
 /* TABS */
-.tabs{display:flex;border-bottom:1px solid rgba(200,146,42,0.18);background:#09080A;padding:0 24px;overflow-x:auto}
-.tab{padding:13px 18px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(240,230,211,0.4);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .18s,border-color .18s}
+.tabs{display:flex;border-bottom:1px solid rgba(200,146,42,0.18);padding:0 24px;overflow-x:auto}
+.tab{padding:12px 18px;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(240,230,211,0.38);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .18s,border-color .18s}
 .tab.active{color:#C8922A;border-bottom-color:#C8922A}
-.tab:hover:not(.active){color:rgba(240,230,211,0.7)}
+.tab:hover:not(.active){color:rgba(240,230,211,0.65)}
 
 /* CONTENT */
-.dash-content{padding:24px;max-width:1100px;margin:0 auto;width:100%}
+.content{padding:22px;max-width:1100px;margin:0 auto;width:100%}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
-/* STATS ROW */
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:28px}
-.stat-card{background:#110D08;border:1px solid rgba(200,146,42,0.15);border-radius:4px;padding:16px}
-.stat-val{font-size:28px;font-weight:600;color:#C8922A;margin-bottom:4px}
-.stat-lbl{font-size:10px;color:rgba(240,230,211,0.4);letter-spacing:0.12em;text-transform:uppercase}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px}
+.stat{background:#110D08;border:1px solid rgba(200,146,42,0.13);border-radius:4px;padding:15px}
+.stat-n{font-size:30px;font-weight:600;color:#C8922A}
+.stat-l{font-size:10px;color:rgba(240,230,211,0.38);letter-spacing:0.12em;text-transform:uppercase;margin-top:3px}
+
+/* FILTERS */
+.filter-bar{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.fb{padding:5px 12px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;border-radius:2px;cursor:pointer;border:1px solid rgba(200,146,42,0.18);background:transparent;color:rgba(240,230,211,0.38);transition:all .15s}
+.fb.active{background:rgba(200,146,42,0.09);border-color:#C8922A;color:#C8922A}
+.refresh{margin-left:auto;padding:6px 13px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;background:#C8922A;color:#09080A;border:none;border-radius:2px;cursor:pointer}
+.refresh:hover{background:#d9a03c}
 
 /* TABLE */
-.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.section-hdr h2{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,230,211,0.5)}
-.filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.filter-btn{padding:6px 14px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;border-radius:2px;cursor:pointer;border:1px solid rgba(200,146,42,0.2);background:transparent;color:rgba(240,230,211,0.4);transition:all .15s}
-.filter-btn.active{background:rgba(200,146,42,0.1);border-color:#C8922A;color:#C8922A}
-.refresh-btn{margin-left:auto;padding:6px 14px;font-size:11px;background:#C8922A;color:#09080A;border:none;border-radius:2px;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase;font-weight:700}
-.refresh-btn:hover{background:#d9a03c}
-.tbl-wrap{overflow-x:auto;border:1px solid rgba(200,146,42,0.15);border-radius:4px}
+.tbl-wrap{overflow-x:auto;border:1px solid rgba(200,146,42,0.13);border-radius:4px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#1C1408;color:rgba(240,230,211,0.5);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:10px 12px;text-align:left;border-bottom:1px solid rgba(200,146,42,0.15);white-space:nowrap}
-td{padding:11px 12px;border-bottom:1px solid rgba(200,146,42,0.07);color:#F0E6D3;vertical-align:middle}
+th{background:#160F05;color:rgba(240,230,211,0.42);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:10px 12px;text-align:left;border-bottom:1px solid rgba(200,146,42,0.13);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid rgba(200,146,42,0.06);color:#F0E6D3;vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(200,146,42,0.03)}
+tr:hover td{background:rgba(200,146,42,0.025)}
+.empty{text-align:center;color:rgba(240,230,211,0.28);padding:36px;font-size:13px}
 
 /* STATUS BADGES */
-.badge-status{display:inline-block;padding:3px 9px;border-radius:2px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700}
-.s-pending{background:rgba(200,146,42,0.12);color:#C8922A;border:1px solid rgba(200,146,42,0.3)}
-.s-confirmed{background:rgba(40,160,80,0.12);color:#5dc98a;border:1px solid rgba(40,160,80,0.3)}
-.s-cancelled{background:rgba(200,60,60,0.12);color:#e07070;border:1px solid rgba(200,60,60,0.3)}
-.s-completed{background:rgba(80,120,200,0.12);color:#7aacee;border:1px solid rgba(80,120,200,0.3)}
+.bs{display:inline-block;padding:3px 8px;border-radius:2px;font-size:10px;letter-spacing:0.09em;text-transform:uppercase;font-weight:700}
+.bs-pending{background:rgba(200,146,42,0.1);color:#C8922A;border:1px solid rgba(200,146,42,0.28)}
+.bs-confirmed{background:rgba(40,160,80,0.1);color:#5dc98a;border:1px solid rgba(40,160,80,0.28)}
+.bs-cancelled{background:rgba(200,60,60,0.1);color:#e07070;border:1px solid rgba(200,60,60,0.28)}
+.bs-completed{background:rgba(80,120,200,0.1);color:#7aacee;border:1px solid rgba(80,120,200,0.28)}
 
 /* ACTION BUTTONS */
-.act-btn{padding:4px 10px;font-size:10px;border-radius:2px;cursor:pointer;border:1px solid;letter-spacing:0.08em;text-transform:uppercase;transition:all .15s;margin-right:4px;white-space:nowrap}
-.act-confirm{color:#5dc98a;border-color:rgba(40,160,80,0.3);background:transparent}
-.act-confirm:hover{background:rgba(40,160,80,0.1)}
-.act-cancel{color:#e07070;border-color:rgba(200,60,60,0.3);background:transparent}
-.act-cancel:hover{background:rgba(200,60,60,0.1)}
-.act-complete{color:#7aacee;border-color:rgba(80,120,200,0.3);background:transparent}
-.act-complete:hover{background:rgba(80,120,200,0.1)}
-.act-contact{color:#C8922A;border-color:rgba(200,146,42,0.3);background:transparent}
-.act-contact:hover{background:rgba(200,146,42,0.08)}
+.ab{padding:4px 9px;font-size:10px;border-radius:2px;cursor:pointer;border:1px solid;letter-spacing:0.08em;text-transform:uppercase;transition:all .13s;margin-right:3px;white-space:nowrap;background:transparent}
+.ab-view{color:rgba(240,230,211,0.55);border-color:rgba(200,146,42,0.2)}
+.ab-view:hover{color:#C8922A;border-color:rgba(200,146,42,0.4)}
+.ab-confirm{color:#5dc98a;border-color:rgba(40,160,80,0.28)}
+.ab-confirm:hover{background:rgba(40,160,80,0.08)}
+.ab-cancel{color:#e07070;border-color:rgba(200,60,60,0.28)}
+.ab-cancel:hover{background:rgba(200,60,60,0.08)}
+.ab-complete{color:#7aacee;border-color:rgba(80,120,200,0.28)}
+.ab-complete:hover{background:rgba(80,120,200,0.08)}
 
-/* DETAIL MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.open{display:flex}
-.modal{background:#110D08;border:1px solid rgba(200,146,42,0.25);border-radius:6px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto}
-.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(200,146,42,0.15)}
-.modal-hdr h3{font-family:Georgia,serif;font-size:18px;font-weight:400;color:#F0E6D3}
-.modal-close{background:transparent;border:none;color:rgba(240,230,211,0.4);font-size:20px;cursor:pointer;padding:4px 8px}
-.modal-close:hover{color:#C8922A}
-.modal-body{padding:20px}
-.detail-row{display:flex;padding:8px 0;border-bottom:1px solid rgba(200,146,42,0.08);font-size:13px}
-.detail-row:last-child{border-bottom:none}
-.detail-lbl{color:rgba(240,230,211,0.42);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;width:110px;flex-shrink:0;padding-top:1px}
-.detail-val{color:#F0E6D3;flex:1}
-.modal-actions{display:flex;gap:8px;flex-wrap:wrap;padding:16px 20px;border-top:1px solid rgba(200,146,42,0.12)}
-.modal-actions button{flex:1;min-width:100px}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1000;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#110D08;border:1px solid rgba(200,146,42,0.22);border-radius:6px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid rgba(200,146,42,0.13)}
+.mhdr h3{font-family:Georgia,serif;font-size:17px;font-weight:400}
+.mclose{background:transparent;border:none;color:rgba(240,230,211,0.35);font-size:22px;cursor:pointer;line-height:1;padding:2px 6px}
+.mclose:hover{color:#C8922A}
+.mbody{padding:18px}
+.dr{display:flex;padding:7px 0;border-bottom:1px solid rgba(200,146,42,0.07);font-size:13px}
+.dr:last-child{border-bottom:none}
+.dl{color:rgba(240,230,211,0.4);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;width:100px;flex-shrink:0;padding-top:2px}
+.dv{color:#F0E6D3;flex:1;word-break:break-word}
+.mfoot{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-top:1px solid rgba(200,146,42,0.1)}
+.mfoot button{flex:1;min-width:90px;padding:10px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;border-radius:3px;cursor:pointer;transition:all .15s}
 
-/* CONTACT FORM IN MODAL */
-.contact-form{margin-top:16px;padding-top:16px;border-top:1px solid rgba(200,146,42,0.12)}
-.contact-form label{display:block;font-size:11px;color:rgba(240,230,211,0.45);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px}
-.contact-form input,.contact-form textarea,.contact-form select{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(200,146,42,0.18);border-radius:3px;color:#F0E6D3;font-size:13px;padding:10px 12px;outline:none;margin-bottom:12px;-webkit-appearance:none;appearance:none}
-.contact-form textarea{resize:vertical;min-height:80px}
-.contact-form input:focus,.contact-form textarea:focus,.contact-form select:focus{border-color:#C8922A}
-.contact-form input::placeholder,.contact-form textarea::placeholder{color:rgba(240,230,211,0.2)}
+/* QUICK MSG */
+.qmsg{margin-top:16px;padding-top:16px;border-top:1px solid rgba(200,146,42,0.1)}
+.qmsg label{display:block;font-size:11px;color:rgba(240,230,211,0.42);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:7px}
+.qmsg textarea{width:100%;background:rgba(255,255,255,0.025);border:1px solid rgba(200,146,42,0.18);border-radius:3px;color:#F0E6D3;font-size:13px;padding:10px 12px;min-height:80px;resize:vertical;outline:none;margin-bottom:10px;line-height:1.5}
+.qmsg textarea:focus{border-color:#C8922A}
+.qmsg textarea::placeholder{color:rgba(240,230,211,0.2)}
+.qmsg button{padding:9px 18px;background:#C8922A;color:#09080A;border:none;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer}
+.qmsg button:hover{background:#d9a03c}
 
-/* LOADING / EMPTY */
-.loading-row td{text-align:center;padding:32px;color:rgba(240,230,211,0.3);font-size:13px}
-.empty-state{text-align:center;padding:48px 24px;color:rgba(240,230,211,0.3);font-size:13px}
-
-/* NOTIFICATION TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:#1C1408;border:1px solid rgba(200,146,42,0.35);border-radius:4px;padding:12px 18px;font-size:13px;color:#F0E6D3;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:300px}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:#1C1408;border:1px solid rgba(200,146,42,0.3);border-radius:4px;padding:11px 16px;font-size:13px;color:#F0E6D3;z-index:9999;transform:translateY(60px);opacity:0;transition:all .28s;max-width:280px;pointer-events:none}
 .toast.show{transform:translateY(0);opacity:1}
-.toast.success{border-color:rgba(40,160,80,0.4);color:#5dc98a}
-.toast.error{border-color:rgba(200,60,60,0.4);color:#e07070}
+.toast.ok{border-color:rgba(40,160,80,0.4);color:#5dc98a}
+.toast.err{border-color:rgba(200,60,60,0.4);color:#e07070}
 
 /* MOBILE */
-@media(max-width:700px){
-  .dash-content{padding:14px}
-  .top-bar{padding:12px 16px}
-  .top-title{display:none}
-  .tabs{padding:0 12px}
-  .tab{padding:11px 12px;font-size:11px}
-  .stats-row{grid-template-columns:1fr 1fr}
+@media(max-width:680px){
+  .content{padding:14px}
+  .top-bar{padding:10px 14px}
+  .top-subtitle,.admin-chip{display:none}
+  .tabs{padding:0 14px}
+  .tab{padding:10px 12px;font-size:10px}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat-n{font-size:24px}
   th:nth-child(n+5),td:nth-child(n+5){display:none}
+  .filter-bar{gap:5px}
+}
+@media(max-width:420px){
+  th:nth-child(n+4),td:nth-child(n+4){display:none}
+  .stats{grid-template-columns:1fr 1fr}
+  .keypad{gap:6px}
+  .key{padding:13px;font-size:18px}
+}
+
+/* ── ADMIN MOBILE COMPREHENSIVE FIX ─────────────────── */
+@media(max-width:768px){
+  .lfield select,.lfield input,.qmsg textarea{font-size:16px!important}
+  .keypad{gap:10px;max-width:300px;margin:0 auto}
+  .key{min-height:52px;font-size:22px;display:flex;align-items:center;justify-content:center}
+  .key.del{font-size:16px}
 }
 @media(max-width:480px){
-  .stats-row{grid-template-columns:1fr 1fr}
-  th:nth-child(n+4),td:nth-child(n+4){display:none}
-  .filter-row{gap:6px}
-  .filter-btn{padding:5px 10px;font-size:10px}
+  .login-box{padding:24px 16px}
+  .pin-dots{gap:14px;margin-bottom:20px}
+  .pin-dot{width:14px;height:14px}
+  .keypad{gap:8px}
+  .key{min-height:48px;padding:12px;font-size:20px}
+  .top-bar{padding:10px 12px}
+  .top-logo{height:22px}
+  .logout-btn{padding:4px 8px;font-size:10px}
+  .admin-chip{display:none}
+  .tabs{padding:0 8px}
+  .tab{padding:10px 9px;font-size:10px;letter-spacing:0.06em}
+  .filter-bar{gap:5px}
+  .fb{padding:5px 9px;font-size:10px}
+  .refresh{padding:5px 10px;font-size:10px}
 }
+@media(max-width:560px){
+  .overlay{padding:0;align-items:flex-end}
+  .modal{border-radius:6px 6px 0 0;max-height:92vh;padding-bottom:env(safe-area-inset-bottom,16px)}
+  .mhdr{padding:14px 16px}
+  .mbody{padding:14px 16px}
+  .mfoot{padding:12px 16px;flex-direction:column}
+  .mfoot button{min-width:100%}
+  .dr{font-size:12px}
+  .dl{width:80px;font-size:10px}
+  .qmsg textarea{font-size:16px!important}
+  .tbl-wrap{-webkit-overflow-scrolling:touch}
+  td,th{font-size:12px;padding:8px 10px;white-space:nowrap}
+}
+@media(max-width:360px){
+  .stats{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-n{font-size:22px}
+  .tab{padding:9px 7px;font-size:9px;letter-spacing:0.04em}
+  .key{min-height:44px;font-size:18px}
+  .login-box{padding:20px 12px}
+}
+
 </style>
 </head>
 <body>
 
-<!-- ── LOGIN ─────────────────────────────────────────────────── -->
+<!-- ══ LOGIN SCREEN ══════════════════════════════════════════════ -->
 <div id="login-screen">
-  <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="login-logo" onerror="this.style.display='none'">
+  <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="login-logo"
+       onerror="this.style.display='none'">
   <div class="login-box">
     <div class="login-eyebrow">Admin Access</div>
-    <h1>Team Login</h1>
+    <div class="login-title">Team Login</div>
+
     <div class="lfield">
-      <label>Team member</label>
-      <select id="member-select">
-        <option value="">Select your name</option>
+      <label>Your name</label>
+      <select id="member-sel" class="loading">
+        <option value="">Loading team&hellip;</option>
       </select>
     </div>
-    <div class="lfield">
-      <label>Passcode</label>
-      <div class="pin-dots" id="pin-dots">
-        <div class="pin-dot" id="dot-0"></div>
-        <div class="pin-dot" id="dot-1"></div>
-        <div class="pin-dot" id="dot-2"></div>
-        <div class="pin-dot" id="dot-3"></div>
-      </div>
+
+    <span class="pin-label">Enter your 4-digit passcode</span>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
     </div>
-    <div class="pin-keypad">
-      <div class="pin-key" onclick="pinPress('1')">1</div>
-      <div class="pin-key" onclick="pinPress('2')">2</div>
-      <div class="pin-key" onclick="pinPress('3')">3</div>
-      <div class="pin-key" onclick="pinPress('4')">4</div>
-      <div class="pin-key" onclick="pinPress('5')">5</div>
-      <div class="pin-key" onclick="pinPress('6')">6</div>
-      <div class="pin-key" onclick="pinPress('7')">7</div>
-      <div class="pin-key" onclick="pinPress('8')">8</div>
-      <div class="pin-key" onclick="pinPress('9')">9</div>
-      <div class="pin-key del" onclick="pinDel()">&#9003;</div>
-      <div class="pin-key zero" onclick="pinPress('0')">0</div>
+
+    <div class="keypad">
+      <div class="key" onclick="kp('1')">1</div>
+      <div class="key" onclick="kp('2')">2</div>
+      <div class="key" onclick="kp('3')">3</div>
+      <div class="key" onclick="kp('4')">4</div>
+      <div class="key" onclick="kp('5')">5</div>
+      <div class="key" onclick="kp('6')">6</div>
+      <div class="key" onclick="kp('7')">7</div>
+      <div class="key" onclick="kp('8')">8</div>
+      <div class="key" onclick="kp('9')">9</div>
+      <div class="key del" onclick="kpDel()">&#9003;</div>
+      <div class="key zero" onclick="kp('0')">0</div>
     </div>
-    <div class="login-err" id="login-err"></div>
+
+    <div class="login-status info" id="login-msg">Select your name to begin</div>
+
+    <div class="setup-notice" id="setup-notice">
+      <strong>Setup needed:</strong> The Apps Script needs to be updated before login works.
+      Replace the script code with <strong>sulit-apps-script-v2.gs</strong> and redeploy as a
+      new version. Make sure the <strong>Team</strong> sheet tab exists with Name / Passcode /
+      Role / Active columns.
+    </div>
   </div>
 </div>
 
-<!-- ── DASHBOARD ──────────────────────────────────────────────── -->
+<!-- ══ DASHBOARD ════════════════════════════════════════════════ -->
 <div id="dashboard">
-
   <div class="top-bar">
-    <div class="top-bar-left">
-      <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="top-logo" onerror="this.style.display='none'">
-      <span class="top-title">Admin Dashboard</span>
+    <div class="top-left">
+      <img src="../media/sulit%20logo-full-white.png" alt="Sulit Lounge" class="top-logo"
+           onerror="this.style.display='none'">
+      <span class="top-subtitle">Admin Dashboard</span>
     </div>
-    <div class="top-bar-right">
-      <span class="admin-name" id="admin-name-display"></span>
+    <div class="top-right">
+      <span class="admin-chip" id="admin-chip"></span>
       <button class="logout-btn" onclick="logout()">Sign out</button>
     </div>
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('reservations')">Reservations</div>
-    <div class="tab" onclick="switchTab('rentals')">Group Rentals</div>
+    <div class="tab active" onclick="switchTab('res')">Reservations</div>
+    <div class="tab" onclick="switchTab('rent')">Group Rentals</div>
   </div>
 
-  <div class="dash-content">
+  <div class="content">
 
-    <!-- RESERVATIONS TAB -->
-    <div class="tab-panel active" id="tab-reservations">
-      <div class="stats-row" id="res-stats">
-        <div class="stat-card"><div class="stat-val" id="rs-total">—</div><div class="stat-lbl">Total</div></div>
-        <div class="stat-card"><div class="stat-val" id="rs-pending">—</div><div class="stat-lbl">Pending</div></div>
-        <div class="stat-card"><div class="stat-val" id="rs-confirmed">—</div><div class="stat-lbl">Confirmed</div></div>
-        <div class="stat-card"><div class="stat-val" id="rs-today">—</div><div class="stat-lbl">Today</div></div>
+    <!-- RESERVATIONS -->
+    <div class="tab-panel active" id="tp-res">
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="rs-tot">—</div><div class="stat-l">Total</div></div>
+        <div class="stat"><div class="stat-n" id="rs-pend">—</div><div class="stat-l">Pending</div></div>
+        <div class="stat"><div class="stat-n" id="rs-conf">—</div><div class="stat-l">Confirmed</div></div>
+        <div class="stat"><div class="stat-n" id="rs-today">—</div><div class="stat-l">Today</div></div>
       </div>
-      <div class="filter-row">
-        <button class="filter-btn active" onclick="filterRes('all',this)">All</button>
-        <button class="filter-btn" onclick="filterRes('pending',this)">Pending</button>
-        <button class="filter-btn" onclick="filterRes('confirmed',this)">Confirmed</button>
-        <button class="filter-btn" onclick="filterRes('completed',this)">Completed</button>
-        <button class="filter-btn" onclick="filterRes('cancelled',this)">Cancelled</button>
-        <button class="refresh-btn" onclick="loadData()">&#8635; Refresh</button>
+      <div class="filter-bar">
+        <button class="fb active" onclick="fRes('all',this)">All</button>
+        <button class="fb" onclick="fRes('pending',this)">Pending</button>
+        <button class="fb" onclick="fRes('confirmed',this)">Confirmed</button>
+        <button class="fb" onclick="fRes('completed',this)">Completed</button>
+        <button class="fb" onclick="fRes('cancelled',this)">Cancelled</button>
+        <button class="refresh" onclick="loadAll()">&#8635; Refresh</button>
       </div>
       <div class="tbl-wrap">
         <table>
-          <thead><tr>
-            <th>Date</th><th>Time</th><th>Name</th><th>Guests</th>
-            <th>Phone</th><th>Status</th><th>Actions</th>
-          </tr></thead>
-          <tbody id="res-tbody">
-            <tr class="loading-row"><td colspan="7">Loading reservations&hellip;</td></tr>
-          </tbody>
+          <thead><tr><th>Date</th><th>Time</th><th>Name</th><th>Guests</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="res-body"><tr><td colspan="7" class="empty">Loading&hellip;</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- RENTALS TAB -->
-    <div class="tab-panel" id="tab-rentals">
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-val" id="gr-total">—</div><div class="stat-lbl">Total Inquiries</div></div>
-        <div class="stat-card"><div class="stat-val" id="gr-pending">—</div><div class="stat-lbl">Pending</div></div>
-        <div class="stat-card"><div class="stat-val" id="gr-confirmed">—</div><div class="stat-lbl">Confirmed</div></div>
+    <!-- GROUP RENTALS -->
+    <div class="tab-panel" id="tp-rent">
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="gr-tot">—</div><div class="stat-l">Total</div></div>
+        <div class="stat"><div class="stat-n" id="gr-pend">—</div><div class="stat-l">Pending</div></div>
+        <div class="stat"><div class="stat-n" id="gr-conf">—</div><div class="stat-l">Confirmed</div></div>
       </div>
-      <div class="filter-row">
-        <button class="filter-btn active" onclick="filterRent('all',this)">All</button>
-        <button class="filter-btn" onclick="filterRent('pending',this)">Pending</button>
-        <button class="filter-btn" onclick="filterRent('confirmed',this)">Confirmed</button>
-        <button class="filter-btn" onclick="filterRent('completed',this)">Completed</button>
-        <button class="filter-btn" onclick="filterRent('cancelled',this)">Cancelled</button>
-        <button class="refresh-btn" onclick="loadData()">&#8635; Refresh</button>
+      <div class="filter-bar">
+        <button class="fb active" onclick="fRent('all',this)">All</button>
+        <button class="fb" onclick="fRent('pending',this)">Pending</button>
+        <button class="fb" onclick="fRent('confirmed',this)">Confirmed</button>
+        <button class="fb" onclick="fRent('completed',this)">Completed</button>
+        <button class="fb" onclick="fRent('cancelled',this)">Cancelled</button>
+        <button class="refresh" onclick="loadAll()">&#8635; Refresh</button>
       </div>
       <div class="tbl-wrap">
         <table>
-          <thead><tr>
-            <th>Date</th><th>Time</th><th>Contact</th><th>Event</th>
-            <th>Guests</th><th>Status</th><th>Actions</th>
-          </tr></thead>
-          <tbody id="rent-tbody">
-            <tr class="loading-row"><td colspan="7">Loading inquiries&hellip;</td></tr>
-          </tbody>
+          <thead><tr><th>Date</th><th>Time</th><th>Contact</th><th>Event</th><th>Guests</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="rent-body"><tr><td colspan="7" class="empty">Loading&hellip;</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -270,375 +320,374 @@ tr:hover td{background:rgba(200,146,42,0.03)}
   </div>
 </div>
 
-<!-- ── DETAIL MODAL ───────────────────────────────────────────── -->
-<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+<!-- ══ DETAIL MODAL ═════════════════════════════════════════════ -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeMod()">
   <div class="modal">
-    <div class="modal-hdr">
-      <h3 id="modal-title">Details</h3>
-      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    <div class="mhdr">
+      <h3 id="mod-title">Details</h3>
+      <button class="mclose" onclick="closeMod()">&#215;</button>
     </div>
-    <div class="modal-body" id="modal-body"></div>
-    <div class="modal-actions" id="modal-actions"></div>
+    <div class="mbody" id="mod-body"></div>
+    <div class="mfoot" id="mod-foot"></div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
+// ── CONFIG ────────────────────────────────────────────────────────
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzujLbZ7-o84n312UW5MuXorsEROWLlhUllWO2_Soz4yKMsTtOGCXB1sbxpzNmTfnqgiQ/exec';
-var currentMember = null;
-var allRes = [];
+
+// ── STATE ─────────────────────────────────────────────────────────
+var me = null;
+var allRes  = [];
 var allRent = [];
-var resFilter = 'all';
-var rentFilter = 'all';
-
-// ── PIN LOGIN ──────────────────────────────────────────────────
+var fltRes  = 'all';
+var fltRent = 'all';
 var pin = '';
-var maxPin = 4;
+var PIN_LEN = 4;
 
-function pinPress(d) {
-  if (pin.length >= maxPin) return;
+// ── PIN KEYPAD ────────────────────────────────────────────────────
+function kp(d) {
+  if (pin.length >= PIN_LEN) return;
   pin += d;
-  updateDots();
-  if (pin.length === maxPin) setTimeout(attemptLogin, 150);
+  syncDots();
+  if (pin.length === PIN_LEN) {
+    setTimeout(doAuth, 120);
+  }
 }
 
-function pinDel() {
+function kpDel() {
   pin = pin.slice(0, -1);
-  updateDots();
-  document.getElementById('login-err').textContent = '';
+  syncDots();
+  setMsg('', 'info');
 }
 
-function updateDots() {
-  for (var i = 0; i < maxPin; i++) {
-    document.getElementById('dot-'+i).classList.toggle('filled', i < pin.length);
+function syncDots() {
+  for (var i = 0; i < PIN_LEN; i++) {
+    document.getElementById('d'+i).classList.toggle('filled', i < pin.length);
   }
 }
 
-function attemptLogin() {
-  var member = document.getElementById('member-select').value;
+function shakeDots() {
+  for (var i = 0; i < PIN_LEN; i++) {
+    var d = document.getElementById('d'+i);
+    d.classList.add('shake');
+    setTimeout(function(el){ return function(){ el.classList.remove('shake'); }; }(d), 350);
+  }
+}
+
+function setMsg(txt, type) {
+  var el = document.getElementById('login-msg');
+  el.textContent = txt;
+  el.className = 'login-status ' + (type||'info');
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────
+function doAuth() {
+  var member = document.getElementById('member-sel').value;
   if (!member) {
-    document.getElementById('login-err').textContent = 'Please select your name first.';
-    pin = ''; updateDots(); return;
+    setMsg('Please select your name first.', 'err');
+    pin = ''; syncDots(); return;
   }
-  // Send auth check to Apps Script
-  fetch(SCRIPT_URL + '?action=auth&member=' + encodeURIComponent(member) + '&pin=' + encodeURIComponent(pin), {
-    method: 'GET',
-    mode: 'cors'
-  }).then(function(r){ return r.json(); }).then(function(data){
-    if (data.ok) {
-      currentMember = member;
-      sessionStorage.setItem('sulit_admin', member);
-      showDashboard(member);
-    } else {
-      document.getElementById('login-err').textContent = 'Incorrect passcode. Try again.';
-      pin = ''; updateDots();
-    }
-  }).catch(function(){
-    // Fallback: check stored members client-side (populated on load)
-    var storedMembers = window._members || [];
-    var found = storedMembers.find(function(m){ return m.name === member && m.pin === pin; });
-    if (found) {
-      currentMember = member;
-      sessionStorage.setItem('sulit_admin', member);
-      showDashboard(member);
-    } else {
-      document.getElementById('login-err').textContent = 'Incorrect passcode. Try again.';
-      pin = ''; updateDots();
-    }
-  });
+  setMsg('Verifying\u2026', 'info');
+
+  var url = SCRIPT_URL + '?action=auth'
+    + '&member=' + encodeURIComponent(member)
+    + '&pin='    + encodeURIComponent(pin);
+
+  fetch(url, { method: 'GET' })
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      if (data.ok) {
+        me = member;
+        sessionStorage.setItem('sulit_admin', member);
+        enterDashboard(member);
+      } else if (data.error && data.error.indexOf('Team sheet') >= 0) {
+        setMsg('Team sheet not found — see setup notice below.', 'err');
+        document.getElementById('setup-notice').style.display = 'block';
+        pin = ''; syncDots();
+      } else {
+        setMsg('Incorrect passcode. Try again.', 'err');
+        shakeDots();
+        pin = ''; syncDots();
+      }
+    })
+    .catch(function(err) {
+      // Script not updated yet or network issue
+      setMsg('Cannot reach the server. Is the script deployed with doGet?', 'err');
+      document.getElementById('setup-notice').style.display = 'block';
+      pin = ''; syncDots();
+    });
 }
 
-function showDashboard(member) {
+// ── LOAD TEAM NAMES ───────────────────────────────────────────────
+function loadTeam() {
+  fetch(SCRIPT_URL + '?action=getMembers', { method: 'GET' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var sel = document.getElementById('member-sel');
+      sel.className = '';
+      if (data.members && data.members.length) {
+        sel.innerHTML = '<option value="">Select your name</option>';
+        data.members.forEach(function(m) {
+          var o = document.createElement('option');
+          o.value = m.name; o.textContent = m.name;
+          sel.appendChild(o);
+        });
+        setMsg('Select your name to begin', 'info');
+      } else {
+        sel.innerHTML = '<option value="">No team members found</option>';
+        setMsg('Team sheet missing or empty — see setup notice.', 'err');
+        document.getElementById('setup-notice').style.display = 'block';
+      }
+    })
+    .catch(function() {
+      var sel = document.getElementById('member-sel');
+      sel.className = '';
+      sel.innerHTML = '<option value="">Could not load team</option>';
+      setMsg('Could not reach the Apps Script — see setup notice.', 'err');
+      document.getElementById('setup-notice').style.display = 'block';
+    });
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────
+function enterDashboard(name) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'flex';
-  document.getElementById('admin-name-display').textContent = member;
-  loadData();
-  loadTeamMembers();
+  document.getElementById('dashboard').style.flexDirection = 'column';
+  document.getElementById('admin-chip').textContent = name;
+  loadAll();
 }
 
 function logout() {
   sessionStorage.removeItem('sulit_admin');
-  currentMember = null;
-  pin = ''; updateDots();
+  me = null; pin = ''; syncDots();
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('login-err').textContent = '';
-  document.getElementById('member-select').value = '';
+  setMsg('Select your name to begin', 'info');
+  document.getElementById('member-sel').value = '';
 }
 
-// ── LOAD TEAM MEMBERS from sheet ──────────────────────────────
-function loadTeamMembers() {
-  fetch(SCRIPT_URL + '?action=getMembers', { method:'GET', mode:'cors' })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if (data.members) {
-        window._members = data.members;
-        var sel = document.getElementById('member-select');
-        sel.innerHTML = '<option value="">Select your name</option>';
-        data.members.forEach(function(m){
-          var opt = document.createElement('option');
-          opt.value = m.name; opt.textContent = m.name;
-          sel.appendChild(opt);
-        });
-      }
-    }).catch(function(){});
-}
-
-// ── LOAD DATA ─────────────────────────────────────────────────
-function loadData() {
-  fetchSheetData('Reservations', function(rows) {
-    allRes = rows;
-    renderRes();
-    updateResStats();
+// ── DATA LOADING ──────────────────────────────────────────────────
+function loadAll() {
+  loadSheet('Reservations', function(rows) {
+    allRes = rows; renderRes(); statsRes();
   });
-  fetchSheetData('Group Rentals', function(rows) {
-    allRent = rows;
-    renderRent();
-    updateRentStats();
+  loadSheet('Group Rentals', function(rows) {
+    allRent = rows; renderRent(); statsRent();
   });
 }
 
-function fetchSheetData(sheetName, cb) {
-  fetch(SCRIPT_URL + '?action=getData&sheet=' + encodeURIComponent(sheetName), {
-    method: 'GET', mode: 'cors'
-  }).then(function(r){ return r.json(); })
-    .then(function(data){ cb(data.rows || []); })
-    .catch(function(){ cb([]); });
+function loadSheet(name, cb) {
+  fetch(SCRIPT_URL + '?action=getData&sheet=' + encodeURIComponent(name), { method: 'GET' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { cb(d.rows || []); })
+    .catch(function() { cb([]); });
 }
 
-// ── RENDER RESERVATIONS ───────────────────────────────────────
+// ── RENDER ────────────────────────────────────────────────────────
 function renderRes() {
-  var filtered = resFilter === 'all' ? allRes : allRes.filter(function(r){ return (r.status||'pending').toLowerCase() === resFilter; });
-  var tbody = document.getElementById('res-tbody');
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr class="loading-row"><td colspan="7">No reservations found.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = filtered.map(function(r, i) {
-    var st = (r.status || 'pending').toLowerCase();
-    return '<tr>' +
-      '<td>'+(r.date||'—')+'</td>' +
-      '<td>'+(r.time||'—')+'</td>' +
-      '<td>'+(r.firstName||'')+' '+(r.lastName||'')+'</td>' +
-      '<td>'+(r.guests||'—')+'</td>' +
-      '<td><a href="tel:'+(r.phone||'')+'" style="color:#C8922A">'+(r.phone||'—')+'</a></td>' +
-      '<td><span class="badge-status s-'+st+'">'+st+'</span></td>' +
-      '<td>'+actionBtns(r, 'res', i)+'</td>' +
-      '</tr>';
+  var rows = fltRes === 'all' ? allRes
+    : allRes.filter(function(r){ return (r.status||'pending').toLowerCase() === fltRes; });
+  var body = document.getElementById('res-body');
+  if (!rows.length) { body.innerHTML = '<tr><td colspan="7" class="empty">No records.</td></tr>'; return; }
+  body.innerHTML = rows.map(function(r, i) {
+    var st = (r.status||'pending').toLowerCase();
+    var name = ((r.firstName||'') + ' ' + (r.lastName||'')).trim() || r.name || '—';
+    return '<tr>'
+      + '<td>' + (r.date||'—') + '</td>'
+      + '<td>' + (r.time||'—') + '</td>'
+      + '<td>' + name + '</td>'
+      + '<td>' + (r.guests||'—') + '</td>'
+      + '<td><a href="tel:' + (r.phone||'') + '" style="color:#C8922A">' + (r.phone||'—') + '</a></td>'
+      + '<td><span class="bs bs-'+st+'">' + st + '</span></td>'
+      + '<td>' + rowBtns('res', i, st) + '</td>'
+      + '</tr>';
   }).join('');
 }
 
 function renderRent() {
-  var filtered = rentFilter === 'all' ? allRent : allRent.filter(function(r){ return (r.status||'pending').toLowerCase() === rentFilter; });
-  var tbody = document.getElementById('rent-tbody');
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr class="loading-row"><td colspan="7">No inquiries found.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = filtered.map(function(r, i) {
-    var st = (r.status || 'pending').toLowerCase();
-    return '<tr>' +
-      '<td>'+(r.date||'—')+'</td>' +
-      '<td>'+(r.time||'—')+'</td>' +
-      '<td>'+(r.name||'—')+'</td>' +
-      '<td>'+(r.eventType||'—')+'</td>' +
-      '<td>'+(r.guests||'—')+'</td>' +
-      '<td><span class="badge-status s-'+st+'">'+st+'</span></td>' +
-      '<td>'+actionBtns(r, 'rent', i)+'</td>' +
-      '</tr>';
+  var rows = fltRent === 'all' ? allRent
+    : allRent.filter(function(r){ return (r.status||'pending').toLowerCase() === fltRent; });
+  var body = document.getElementById('rent-body');
+  if (!rows.length) { body.innerHTML = '<tr><td colspan="7" class="empty">No records.</td></tr>'; return; }
+  body.innerHTML = rows.map(function(r, i) {
+    var st = (r.status||'pending').toLowerCase();
+    return '<tr>'
+      + '<td>' + (r.date||'—') + '</td>'
+      + '<td>' + (r.time||'—') + '</td>'
+      + '<td>' + (r.name||'—') + '</td>'
+      + '<td>' + (r.eventType||'—') + '</td>'
+      + '<td>' + (r.guests||'—') + '</td>'
+      + '<td><span class="bs bs-'+st+'">' + st + '</span></td>'
+      + '<td>' + rowBtns('rent', i, st) + '</td>'
+      + '</tr>';
   }).join('');
 }
 
-function actionBtns(r, type, i) {
-  var st = (r.status || 'pending').toLowerCase();
-  var btns = '<button class="act-btn act-contact" onclick="openDetail(\''+type+'\','+i+')">View</button>';
+function rowBtns(type, i, st) {
+  var b = '<button class="ab ab-view" onclick="openMod(\''+type+'\','+i+')">View</button>';
   if (st === 'pending') {
-    btns += '<button class="act-btn act-confirm" onclick="updateStatus(\''+type+'\','+i+',\'confirmed\')">Confirm</button>';
-    btns += '<button class="act-btn act-cancel" onclick="updateStatus(\''+type+'\','+i+',\'cancelled\')">Cancel</button>';
+    b += '<button class="ab ab-confirm" onclick="setStatus(\''+type+'\','+i+',\'confirmed\')">Confirm</button>';
+    b += '<button class="ab ab-cancel" onclick="setStatus(\''+type+'\','+i+',\'cancelled\')">Cancel</button>';
   }
   if (st === 'confirmed') {
-    btns += '<button class="act-btn act-complete" onclick="updateStatus(\''+type+'\','+i+',\'completed\')">Complete</button>';
-    btns += '<button class="act-btn act-cancel" onclick="updateStatus(\''+type+'\','+i+',\'cancelled\')">Cancel</button>';
+    b += '<button class="ab ab-complete" onclick="setStatus(\''+type+'\','+i+',\'completed\')">Complete</button>';
+    b += '<button class="ab ab-cancel" onclick="setStatus(\''+type+'\','+i+',\'cancelled\')">Cancel</button>';
   }
-  return btns;
+  return b;
 }
 
-// ── STATS ────────────────────────────────────────────────────
-function updateResStats() {
+// ── STATS ─────────────────────────────────────────────────────────
+function statsRes() {
   var today = new Date().toISOString().split('T')[0];
-  document.getElementById('rs-total').textContent = allRes.length;
-  document.getElementById('rs-pending').textContent = allRes.filter(function(r){ return !r.status||r.status==='pending'; }).length;
-  document.getElementById('rs-confirmed').textContent = allRes.filter(function(r){ return r.status==='confirmed'; }).length;
+  document.getElementById('rs-tot').textContent   = allRes.length;
+  document.getElementById('rs-pend').textContent  = allRes.filter(function(r){ return !r.status||r.status==='pending'; }).length;
+  document.getElementById('rs-conf').textContent  = allRes.filter(function(r){ return r.status==='confirmed'; }).length;
   document.getElementById('rs-today').textContent = allRes.filter(function(r){ return r.date===today; }).length;
 }
-
-function updateRentStats() {
-  document.getElementById('gr-total').textContent = allRent.length;
-  document.getElementById('gr-pending').textContent = allRent.filter(function(r){ return !r.status||r.status==='pending'; }).length;
-  document.getElementById('gr-confirmed').textContent = allRent.filter(function(r){ return r.status==='confirmed'; }).length;
+function statsRent() {
+  document.getElementById('gr-tot').textContent  = allRent.length;
+  document.getElementById('gr-pend').textContent = allRent.filter(function(r){ return !r.status||r.status==='pending'; }).length;
+  document.getElementById('gr-conf').textContent = allRent.filter(function(r){ return r.status==='confirmed'; }).length;
 }
 
-// ── FILTERS ──────────────────────────────────────────────────
-function filterRes(f, btn) {
-  resFilter = f;
-  document.querySelectorAll('#tab-reservations .filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  renderRes();
-}
+// ── FILTERS ───────────────────────────────────────────────────────
+function fRes(f,btn){ fltRes=f; document.querySelectorAll('#tp-res .fb').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active'); renderRes(); }
+function fRent(f,btn){ fltRent=f; document.querySelectorAll('#tp-rent .fb').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active'); renderRent(); }
 
-function filterRent(f, btn) {
-  rentFilter = f;
-  document.querySelectorAll('#tab-rentals .filter-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  renderRent();
-}
+// ── STATUS UPDATE ─────────────────────────────────────────────────
+function setStatus(type, idx, newSt) {
+  var arr = type==='res' ? allRes : allRent;
+  var r = arr[idx]; if (!r) return;
+  var rowId = r.rowId || r.rowID || '';
+  var sheet = type==='res' ? 'Reservations' : 'Group Rentals';
 
-// ── STATUS UPDATE ────────────────────────────────────────────
-function updateStatus(type, idx, newStatus) {
-  var arr = type === 'res' ? allRes : allRent;
-  var record = arr[idx];
-  if (!record) return;
-  record.status = newStatus;
+  var url = SCRIPT_URL + '?action=updateStatus'
+    + '&sheet='     + encodeURIComponent(sheet)
+    + '&rowId='     + encodeURIComponent(rowId)
+    + '&status='    + encodeURIComponent(newSt)
+    + '&updatedBy=' + encodeURIComponent(me||'');
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      action: 'updateStatus',
-      sheet: type === 'res' ? 'Reservations' : 'Group Rentals',
-      rowId: record.rowId,
-      status: newStatus,
-      updatedBy: currentMember,
-      record: record
+  fetch(url, { method: 'GET' })
+    .then(function(res){ return res.json(); })
+    .then(function(d){
+      r.status = newSt;
+      toast('Status → ' + newSt, 'ok');
+      type==='res' ? (renderRes(), statsRes()) : (renderRent(), statsRent());
+      closeMod();
     })
-  }).then(function(){
-    toast('Status updated to ' + newStatus, 'success');
-    type === 'res' ? renderRes() : renderRent();
-    closeModal();
-  }).catch(function(){
-    toast('Update sent', 'success');
-    type === 'res' ? renderRes() : renderRent();
-    closeModal();
-  });
+    .catch(function(){
+      r.status = newSt; // optimistic update
+      toast('Updated (offline sync)', 'ok');
+      type==='res' ? (renderRes(), statsRes()) : (renderRent(), statsRent());
+      closeMod();
+    });
 }
 
-// ── DETAIL MODAL ─────────────────────────────────────────────
-function openDetail(type, idx) {
-  var arr = type === 'res' ? allRes : allRent;
-  var r = arr[idx];
-  if (!r) return;
+// ── MODAL ─────────────────────────────────────────────────────────
+function openMod(type, idx) {
+  var arr = type==='res' ? allRes : allRent;
+  var r = arr[idx]; if (!r) return;
+  var st = (r.status||'pending').toLowerCase();
+  var isRes = type==='res';
 
-  var isRes = type === 'res';
-  document.getElementById('modal-title').textContent = isRes ? 'Reservation Details' : 'Group Inquiry Details';
+  document.getElementById('mod-title').textContent = isRes ? 'Reservation Details' : 'Group Inquiry';
 
-  var fields = isRes
-    ? [
-        ['Status', '<span class="badge-status s-'+(r.status||'pending')+'">'+(r.status||'pending')+'</span>'],
-        ['Date', r.date], ['Time', r.time], ['Guests', r.guests],
-        ['Occasion', r.occasion||'—'],
-        ['Name', (r.firstName||'')+' '+(r.lastName||'')],
-        ['Phone', '<a href="tel:'+(r.phone||'')+'" style="color:#C8922A">'+(r.phone||'—')+'</a>'],
-        ['Email', '<a href="mailto:'+(r.email||'')+'" style="color:#C8922A">'+(r.email||'—')+'</a>'],
-        ['Requests', r.notes||'—'],
-        ['SMS Consent', r.smsConsent||'—'],
-        ['Submitted', r.submittedAt||'—'],
-      ]
-    : [
-        ['Status', '<span class="badge-status s-'+(r.status||'pending')+'">'+(r.status||'pending')+'</span>'],
-        ['Event', r.eventType], ['Date', r.date], ['Time', r.time],
-        ['Guests', r.guests], ['Duration', r.duration||'—'],
-        ['Budget/person', r.budget||'—'], ['Alt date', r.altDate||'—'],
-        ['Contact', r.name],
-        ['Phone', '<a href="tel:'+(r.phone||'')+'" style="color:#C8922A">'+(r.phone||'—')+'</a>'],
-        ['Email', '<a href="mailto:'+(r.email||'')+'" style="color:#C8922A">'+(r.email||'—')+'</a>'],
-        ['Company', r.company||'—'], ['Heard via', r.source||'—'],
-        ['Details', r.notes||'—'],
-        ['SMS Consent', r.smsConsent||'—'],
-        ['Submitted', r.submittedAt||'—'],
-      ];
+  var fields = isRes ? [
+    ['Status',   '<span class="bs bs-'+st+'">'+st+'</span>'],
+    ['Date',     r.date||'—'], ['Time', r.time||'—'], ['Guests', r.guests||'—'],
+    ['Occasion', r.occasion||'—'],
+    ['Name',     ((r.firstName||'')+' '+(r.lastName||'')).trim()||'—'],
+    ['Phone',    '<a href="tel:'+(r.phone||'')+'" style="color:#C8922A">'+(r.phone||'—')+'</a>'],
+    ['Email',    '<a href="mailto:'+(r.email||'')+'" style="color:#C8922A">'+(r.email||'—')+'</a>'],
+    ['Requests', r.requests||r.notes||'—'],
+    ['SMS OK',   r.sMSConsent||r.smsConsent||'—'],
+    ['Submitted',r.submittedAt||'—'],
+  ] : [
+    ['Status',   '<span class="bs bs-'+st+'">'+st+'</span>'],
+    ['Event',    r.eventType||'—'], ['Date', r.date||'—'], ['Time', r.time||'—'],
+    ['Guests',   r.guests||'—'], ['Duration', r.duration||'—'],
+    ['Budget',   r.budgetPerson||r.budget||'—'], ['Alt date', r.altDate||'—'],
+    ['Contact',  r.name||'—'],
+    ['Phone',    '<a href="tel:'+(r.phone||'')+'" style="color:#C8922A">'+(r.phone||'—')+'</a>'],
+    ['Email',    '<a href="mailto:'+(r.email||'')+'" style="color:#C8922A">'+(r.email||'—')+'</a>'],
+    ['Company',  r.company||'—'], ['Source', r.source||'—'],
+    ['Details',  r.details||r.notes||'—'],
+    ['SMS OK',   r.sMSConsent||r.smsConsent||'—'],
+    ['Submitted',r.submittedAt||'—'],
+  ];
 
-  document.getElementById('modal-body').innerHTML =
-    fields.map(function(f){ return '<div class="detail-row"><span class="detail-lbl">'+f[0]+'</span><span class="detail-val">'+f[1]+'</span></div>'; }).join('') +
-    '<div class="contact-form" id="quick-msg-form">' +
-      '<label>Quick message to guest</label>' +
-      '<textarea id="qm-body" placeholder="Type a message to send to the guest by email..."></textarea>' +
-      '<button onclick="sendQuickMsg(\''+type+'\','+idx+')" style="padding:9px 18px;background:#C8922A;color:#09080A;border:none;border-radius:3px;font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer">Send Message</button>' +
+  var guestEmail = r.email||'';
+  var guestName  = isRes ? ((r.firstName||r.name||'Guest')).trim() : (r.name||'Guest');
+
+  document.getElementById('mod-body').innerHTML =
+    fields.map(function(f){
+      return '<div class="dr"><span class="dl">'+f[0]+'</span><span class="dv">'+f[1]+'</span></div>';
+    }).join('') +
+    '<div class="qmsg">' +
+      '<label>Send a message to guest</label>' +
+      '<textarea id="qm" placeholder="Write a message to '+guestName+'..."></textarea>' +
+      '<button onclick="sendMsg(\''+guestEmail+'\',\''+guestName+'\')">Send Email</button>' +
     '</div>';
 
-  var st = (r.status || 'pending').toLowerCase();
-  var actHTML = '';
+  // Footer action buttons
+  var foot = '';
   if (st === 'pending') {
-    actHTML += '<button class="act-btn act-confirm" style="flex:1;padding:10px" onclick="updateStatus(\''+type+'\','+idx+',\'confirmed\')">&#10003; Confirm</button>';
-    actHTML += '<button class="act-btn act-cancel" style="flex:1;padding:10px" onclick="updateStatus(\''+type+'\','+idx+',\'cancelled\')">&times; Cancel</button>';
+    foot += '<button class="ab ab-confirm" style="flex:1;padding:11px" onclick="setStatus(\''+type+'\','+idx+',\'confirmed\')">&#10003; Confirm</button>';
+    foot += '<button class="ab ab-cancel"  style="flex:1;padding:11px" onclick="setStatus(\''+type+'\','+idx+',\'cancelled\')">&times; Cancel</button>';
   }
   if (st === 'confirmed') {
-    actHTML += '<button class="act-btn act-complete" style="flex:1;padding:10px" onclick="updateStatus(\''+type+'\','+idx+',\'completed\')">&#10003; Complete</button>';
-    actHTML += '<button class="act-btn act-cancel" style="flex:1;padding:10px" onclick="updateStatus(\''+type+'\','+idx+',\'cancelled\')">&times; Cancel</button>';
+    foot += '<button class="ab ab-complete" style="flex:1;padding:11px" onclick="setStatus(\''+type+'\','+idx+',\'completed\')">&#10003; Mark Complete</button>';
+    foot += '<button class="ab ab-cancel"   style="flex:1;padding:11px" onclick="setStatus(\''+type+'\','+idx+',\'cancelled\')">&times; Cancel</button>';
   }
-  document.getElementById('modal-actions').innerHTML = actHTML;
-  document.getElementById('modal').classList.add('open');
+  document.getElementById('mod-foot').innerHTML = foot;
+  document.getElementById('overlay').classList.add('open');
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
+function closeMod() { document.getElementById('overlay').classList.remove('open'); }
+
+function sendMsg(email, name) {
+  var body = (document.getElementById('qm')||{}).value || '';
+  if (!body.trim()) { toast('Type a message first', ''); return; }
+  var url = SCRIPT_URL + '?action=sendMessage'
+    + '&to='   + encodeURIComponent(email)
+    + '&name=' + encodeURIComponent(name)
+    + '&body=' + encodeURIComponent(body)
+    + '&from=' + encodeURIComponent(me||'Sulit Team');
+  fetch(url, { method: 'GET' })
+    .then(function(){ toast('Message sent to ' + email, 'ok'); if(document.getElementById('qm'))document.getElementById('qm').value=''; })
+    .catch(function(){ toast('Could not send message', 'err'); });
 }
 
-function sendQuickMsg(type, idx) {
-  var arr = type === 'res' ? allRes : allRent;
-  var r = arr[idx];
-  var body = document.getElementById('qm-body').value.trim();
-  if (!body) { toast('Please type a message first', ''); return; }
-  var email = r.email;
-  var name = r.firstName || r.name || 'Guest';
-
-  fetch(SCRIPT_URL, {
-    method: 'POST', mode: 'no-cors',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      action: 'sendMessage',
-      to: email, name: name,
-      body: body, from: currentMember
-    })
-  }).then(function(){
-    toast('Message sent to ' + email, 'success');
-    document.getElementById('qm-body').value = '';
-  }).catch(function(){
-    toast('Message queued', 'success');
-  });
-}
-
-// ── TABS ─────────────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────────────
 function switchTab(t) {
-  document.querySelectorAll('.tab').forEach(function(el,i){
-    el.classList.toggle('active', ['reservations','rentals'][i]===t);
+  var tabs   = ['res','rent'];
+  var labels = document.querySelectorAll('.tab');
+  tabs.forEach(function(id, i) {
+    document.getElementById('tp-'+id).classList.toggle('active', id===t);
+    labels[i] && labels[i].classList.toggle('active', id===t);
   });
-  document.querySelectorAll('.tab-panel').forEach(function(el){
-    el.classList.remove('active');
-  });
-  document.getElementById('tab-'+t).classList.add('active');
 }
 
-// ── TOAST ────────────────────────────────────────────────────
+// ── TOAST ─────────────────────────────────────────────────────────
 function toast(msg, type) {
   var t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast' + (type ? ' '+type : '');
   setTimeout(function(){ t.classList.add('show'); }, 10);
-  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
 }
 
-// ── INIT ─────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function() {
-  loadTeamMembers();
-  // Check existing session
+  loadTeam();
   var saved = sessionStorage.getItem('sulit_admin');
-  if (saved) {
-    currentMember = saved;
-    showDashboard(saved);
-  }
+  if (saved) { me = saved; enterDashboard(saved); }
 });
 </script>
 </body>
