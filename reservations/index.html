@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="../media/apple.png">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:#09080A;min-height:100vh;font-family:'Georgia',serif;color:#F0E6D3}
+html,body{background:#09080A;min-height:100vh;overflow-x:hidden;font-family:'Georgia',serif;color:#F0E6D3}
 a{color:#C8922A;text-decoration:none}
 a:hover{text-decoration:underline}
 
@@ -140,6 +140,40 @@ a:hover{text-decoration:underline}
 @media(max-width:380px){
   .hero h1{font-size:19px}
   .nav-link{display:none}
+}
+
+
+
+/* ── MOBILE COMPREHENSIVE FIX ─────────────────────────── */
+@media(max-width:768px){
+  .field input,.field select,.field textarea,.csel-wrap>div:first-of-type{font-size:16px!important}
+}
+@media(max-width:600px){
+  .row,.row3{grid-template-columns:1fr!important}
+  .fwrap{padding:20px 14px 48px}
+  .stitle{font-size:10px;letter-spacing:0.18em}
+  .slabel{font-size:10px!important}
+  .snum{width:22px!important;height:22px!important;font-size:10px!important}
+  .stepper{padding:20px 8px 0;overflow:hidden}
+  .btn{min-height:48px;font-size:12px}
+  .scard{font-size:12px}
+  .svl{max-width:100%!important;font-size:12px}
+  .hint{font-size:12px}
+  input[type=date]{width:100%;min-width:0}
+  .badge{font-size:10px;padding:4px 8px}
+  .badges{gap:5px}
+  .cbfield{padding:10px}
+  .cbfield span{font-size:12px}
+  .infobox p{font-size:12px}
+}
+@media(max-width:360px){
+  .hero h1{font-size:20px}
+  .hero p{font-size:13px}
+  .nav{padding:10px 14px}
+  .nav-link{display:none}
+  .btn{letter-spacing:0.1em;font-size:11px}
+  .fwrap{padding:16px 12px 40px}
+  .step:not(:last-child)::after{left:50%;width:100%}
 }
 
 </style>
