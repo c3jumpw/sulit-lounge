@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sulit Admin — Connection Debugger</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#09080A;font-family:monospace;color:#F0E6D3;padding:20px;min-height:100vh}
+  h1{color:#C8922A;font-size:18px;margin-bottom:4px;font-family:Georgia,serif}
+  .sub{color:rgba(240,230,211,0.4);font-size:12px;margin-bottom:24px}
+  .card{background:#110D08;border:1px solid rgba(200,146,42,0.2);border-radius:6px;padding:16px;margin-bottom:14px}
+  .card-title{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#C8922A;margin-bottom:12px}
+  .row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid rgba(200,146,42,0.06);font-size:13px}
+  .row:last-child{border-bottom:none}
+  .label{color:rgba(240,230,211,0.5);width:180px;flex-shrink:0;font-size:11px;padding-top:1px}
+  .val{flex:1;word-break:break-all;line-height:1.5}
+  .badge{display:inline-block;padding:2px 8px;border-radius:2px;font-size:10px;font-weight:700;letter-spacing:.1em}
+  .ok  {background:rgba(40,160,80,.15);color:#5dc98a;border:1px solid rgba(40,160,80,.3)}
+  .err {background:rgba(200,60,60,.12);color:#e07070;border:1px solid rgba(200,60,60,.3)}
+  .warn{background:rgba(200,146,42,.12);color:#C8922A;border:1px solid rgba(200,146,42,.3)}
+  .wait{background:rgba(120,120,120,.12);color:#aaa;border:1px solid rgba(120,120,120,.2)}
+  .spin{animation:spin 1s linear infinite;display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  pre{background:#1C1408;border:1px solid rgba(200,146,42,0.15);border-radius:4px;padding:12px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;color:#F0E6D3;margin-top:8px;max-height:200px;overflow-y:auto}
+  .copy-btn{margin-top:16px;padding:10px 20px;background:#C8922A;color:#09080A;border:none;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+  .copy-btn:hover{background:#d9a03c}
+  .report-box{background:#1C1408;border:1px solid rgba(200,146,42,0.2);border-radius:4px;padding:14px;margin-top:16px;font-size:11px;white-space:pre-wrap;word-break:break-all;color:rgba(240,230,211,0.7);max-height:340px;overflow-y:auto;display:none}
+  .section-gap{margin-top:6px}
+  .url-edit{width:100%;background:#1C1408;border:1px solid rgba(200,146,42,0.3);border-radius:3px;color:#F0E6D3;font-family:monospace;font-size:11px;padding:8px 10px;outline:none;margin-bottom:10px}
+  .url-edit:focus{border-color:#C8922A}
+  .run-btn{padding:8px 18px;background:rgba(200,146,42,.15);color:#C8922A;border:1px solid rgba(200,146,42,.4);border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  .run-btn:hover{background:rgba(200,146,42,.25)}
+</style>
+</head>
+<body>
+
+<h1>🔧 Sulit Admin — Connection Debugger</h1>
+<p class="sub">Runs 6 diagnostic tests against the Apps Script. Copy the report at the bottom and send it back.</p>
+
+<div class="card">
+  <div class="card-title">Script URL</div>
+  <input class="url-edit" id="url-input" value="https://script.google.com/macros/s/AKfycbzujLbZ7-o84n312UW5MuXorsEROWLIhUIlWO2_Soz4yKMsTtOGCXB1sbxpzNmTfnqgiQ/exec">
+  <button class="run-btn" onclick="runAll()">▶ Run Diagnostics</button>
+</div>
+
+<div class="card" id="card-env">
+  <div class="card-title">1 · Browser Environment</div>
+  <div id="env-rows"></div>
+</div>
+
+<div class="card" id="card-ping">
+  <div class="card-title">2 · Script Ping (fetch, no-cors)</div>
+  <div id="ping-rows"><div class="row"><span class="label">Status</span><span class="val"><span class="badge wait">⏳ waiting</span></span></div></div>
+</div>
+
+<div class="card" id="card-jsonp-ping">
+  <div class="card-title">3 · JSONP Ping (?action=ping)</div>
+  <div id="jsonp-ping-rows"><div class="row"><span class="label">Status</span><span class="val"><span class="badge wait">⏳ waiting</span></span></div></div>
+</div>
+
+<div class="card" id="card-members">
+  <div class="card-title">4 · getMembers (?action=getMembers)</div>
+  <div id="members-rows"><div class="row"><span class="label">Status</span><span class="val"><span class="badge wait">⏳ waiting</span></span></div></div>
+</div>
+
+<div class="card" id="card-data">
+  <div class="card-title">5 · getData — Reservations sheet</div>
+  <div id="data-rows"><div class="row"><span class="label">Status</span><span class="val"><span class="badge wait">⏳ waiting</span></span></div></div>
+</div>
+
+<div class="card" id="card-timing">
+  <div class="card-title">6 · Timing Summary</div>
+  <div id="timing-rows"><div class="row"><span class="label">Status</span><span class="val"><span class="badge wait">⏳ waiting</span></span></div></div>
+</div>
+
+<button class="copy-btn" onclick="copyReport()" id="copy-btn" style="display:none">📋 Copy Full Report</button>
+<div class="report-box" id="report-box"></div>
+
+<script>
+var SCRIPT_URL = '';
+var timings = {};
+var results = {};
+var _cbIdx = 0;
+
+function badge(type, text) {
+  return '<span class="badge ' + type + '">' + text + '</span>';
+}
+
+function row(label, val) {
+  return '<div class="row"><span class="label">' + label + '</span><span class="val">' + val + '</span></div>';
+}
+
+function setRows(id, html) {
+  document.getElementById(id).innerHTML = html;
+}
+
+// ── 1. ENV ──────────────────────────────────────────────
+function checkEnv() {
+  var ua = navigator.userAgent;
+  var online = navigator.onLine;
+  var proto = location.protocol;
+  var host = location.hostname;
+  var cookieEnabled = navigator.cookieEnabled;
+
+  var html = '';
+  html += row('Page host', host || '(local file)');
+  html += row('Protocol', proto + ' ' + (proto === 'https:' ? badge('ok','HTTPS ✓') : badge('warn','Not HTTPS')));
+  html += row('Online', online ? badge('ok','Yes') : badge('err','Offline!'));
+  html += row('Cookies enabled', cookieEnabled ? badge('ok','Yes') : badge('warn','No'));
+  html += row('Browser', ua.indexOf('Chrome') >= 0 ? 'Chrome' : ua.indexOf('Firefox') >= 0 ? 'Firefox' : ua.indexOf('Safari') >= 0 ? 'Safari' : 'Other');
+  html += row('Script URL set', SCRIPT_URL ? badge('ok','Yes') : badge('err','Empty!'));
+
+  setRows('env-rows', html);
+  results.env = { host: host, protocol: proto, online: online, url: SCRIPT_URL };
+}
+
+// ── 2. PING via fetch (no-cors) ─────────────────────────
+function checkPing(cb) {
+  var start = Date.now();
+  setRows('ping-rows', row('Status', badge('wait','<span class="spin">↻</span> Testing...')));
+
+  fetch(SCRIPT_URL + '?action=ping&_t=' + start, { method: 'GET', mode: 'no-cors' })
+    .then(function(r) {
+      var ms = Date.now() - start;
+      timings.fetch = ms;
+      // no-cors opaque — we can't read body, but reaching here = server reachable
+      setRows('ping-rows',
+        row('Result', badge('ok','Reachable ✓')) +
+        row('Response type', r.type + ' (opaque is normal for no-cors)') +
+        row('Time', ms + 'ms')
+      );
+      results.ping = { ok: true, ms: ms, type: r.type };
+      cb(true);
+    })
+    .catch(function(e) {
+      var ms = Date.now() - start;
+      timings.fetch = ms;
+      setRows('ping-rows',
+        row('Result', badge('err','Network error ✗')) +
+        row('Error', e.message) +
+        row('Time', ms + 'ms') +
+        row('Likely cause', 'Blocked by CORS preflight, firewall, or script not deployed as "Anyone"')
+      );
+      results.ping = { ok: false, error: e.message, ms: ms };
+      cb(false);
+    });
+}
+
+// ── JSONP helper ────────────────────────────────────────
+function jsonpGet(action, extraParams, timeoutMs, cb) {
+  var cbName = '_dbg_cb' + (_cbIdx++);
+  var start = Date.now();
+  var done = false;
+
+  var timer = setTimeout(function() {
+    if (done) return;
+    done = true;
+    cleanup();
+    cb(null, Date.now() - start, 'Timeout after ' + timeoutMs + 'ms — script may be slow, not deployed, or blocking');
+  }, timeoutMs);
+
+  window[cbName] = function(data) {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    cleanup();
+    cb(data, Date.now() - start, null);
+  };
+
+  var params = 'action=' + action + '&callback=' + cbName;
+  if (extraParams) params += '&' + extraParams;
+  params += '&_t=' + start;
+
+  var s = document.createElement('script');
+  s.id = 'dbg_s_' + cbName;
+  s.src = SCRIPT_URL + '?' + params;
+  s.onerror = function() {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    cleanup();
+    cb(null, Date.now() - start, 'Script tag load error — URL may be invalid or script not deployed as "Anyone"');
+  };
+  document.head.appendChild(s);
+
+  function cleanup() {
+    window[cbName] = null;
+    var el = document.getElementById('dbg_s_' + cbName);
+    if (el) el.remove();
+  }
+}
+
+// ── 3. JSONP ping ───────────────────────────────────────
+function checkJsonpPing(cb) {
+  setRows('jsonp-ping-rows', row('Status', badge('wait','<span class="spin">↻</span> Testing JSONP...')));
+
+  jsonpGet('ping', '', 12000, function(data, ms, err) {
+    timings.jsonpPing = ms;
+    if (err) {
+      setRows('jsonp-ping-rows',
+        row('Result', badge('err','Failed ✗')) +
+        row('Error', err) +
+        row('Time', ms + 'ms') +
+        row('Fix', 'Redeploy script: Deploy → Manage → Edit → New version → Execute as: Me, Access: Anyone')
+      );
+      results.jsonpPing = { ok: false, error: err, ms: ms };
+      cb(false);
+    } else if (data && data.ok) {
+      setRows('jsonp-ping-rows',
+        row('Result', badge('ok','Script live ✓')) +
+        row('Message', data.msg || '—') +
+        row('Raw response', '<pre>' + JSON.stringify(data, null, 2) + '</pre>') +
+        row('Time', ms + 'ms')
+      );
+      results.jsonpPing = { ok: true, data: data, ms: ms };
+      cb(true);
+    } else {
+      setRows('jsonp-ping-rows',
+        row('Result', badge('warn','Unexpected response')) +
+        row('Raw response', '<pre>' + JSON.stringify(data, null, 2) + '</pre>') +
+        row('Time', ms + 'ms') +
+        row('Note', 'Script responded but ping action may not exist — update to sulit-apps-script-v2.gs')
+      );
+      results.jsonpPing = { ok: false, data: data, ms: ms };
+      cb(false);
+    }
+  });
+}
+
+// ── 4. getMembers ───────────────────────────────────────
+function checkMembers(cb) {
+  setRows('members-rows', row('Status', badge('wait','<span class="spin">↻</span> Fetching members...')));
+
+  jsonpGet('getMembers', '', 15000, function(data, ms, err) {
+    timings.getMembers = ms;
+    if (err) {
+      setRows('members-rows',
+        row('Result', badge('err','Failed ✗')) +
+        row('Error', err) +
+        row('Time', ms + 'ms')
+      );
+      results.getMembers = { ok: false, error: err, ms: ms };
+      cb(false);
+    } else if (data && data.error) {
+      setRows('members-rows',
+        row('Result', badge('err','Script error ✗')) +
+        row('Error from script', data.error) +
+        row('Raw response', '<pre>' + JSON.stringify(data, null, 2) + '</pre>') +
+        row('Time', ms + 'ms') +
+        row('Fix', data.error.indexOf('Admin Users') >= 0
+          ? 'Create a sheet tab named exactly "Admin Users" with columns: Name | Passcode | Role | Active'
+          : 'Check Apps Script logs: Extensions → Apps Script → Executions')
+      );
+      results.getMembers = { ok: false, error: data.error, ms: ms };
+      cb(false);
+    } else if (data && data.members) {
+      var names = data.members.map(function(m) { return m.name; }).join(', ');
+      setRows('members-rows',
+        row('Result', badge('ok','Success ✓')) +
+        row('Members found', data.members.length + ' — ' + (names || '(none)')) +
+        row('Raw response', '<pre>' + JSON.stringify(data, null, 2) + '</pre>') +
+        row('Time', ms + 'ms')
+      );
+      results.getMembers = { ok: true, count: data.members.length, names: names, ms: ms };
+      cb(true);
+    } else {
+      setRows('members-rows',
+        row('Result', badge('warn','Unexpected shape')) +
+        row('Raw response', '<pre>' + JSON.stringify(data, null, 2) + '</pre>') +
+        row('Time', ms + 'ms')
+      );
+      results.getMembers = { ok: false, data: data, ms: ms };
+      cb(false);
+    }
+  });
+}
+
+// ── 5. getData (Reservations) ───────────────────────────
+function checkData(cb) {
+  setRows('data-rows', row('Status', badge('wait','<span class="spin">↻</span> Fetching sheet data...')));
+
+  jsonpGet('getData', 'sheet=Reservations', 15000, function(data, ms, err) {
+    timings.getData = ms;
+    if (err) {
+      setRows('data-rows',
+        row('Result', badge('err','Failed ✗')) +
+        row('Error', err) +
+        row('Time', ms + 'ms')
+      );
+      results.getData = { ok: false, error: err, ms: ms };
+      cb(false);
+    } else if (data && data.error) {
+      setRows('data-rows',
+        row('Result', badge('err','Script error ✗')) +
+        row('Error', data.error) +
+        row('Raw', '<pre>' + JSON.stringify(data, null, 2) + '</pre>') +
+        row('Time', ms + 'ms')
+      );
+      results.getData = { ok: false, error: data.error, ms: ms };
+      cb(false);
+    } else if (data && data.rows !== undefined) {
+      setRows('data-rows',
+        row('Result', badge('ok','Success ✓')) +
+        row('Rows returned', data.rows.length) +
+        row('Sample (first row)', data.rows.length ? '<pre>' + JSON.stringify(data.rows[0], null, 2) + '</pre>' : '(empty sheet)') +
+        row('Time', ms + 'ms')
+      );
+      results.getData = { ok: true, rowCount: data.rows.length, ms: ms };
+      cb(true);
+    } else {
+      setRows('data-rows',
+        row('Result', badge('warn','Unexpected shape')) +
+        row('Raw', '<pre>' + JSON.stringify(data, null, 2) + '</pre>') +
+        row('Time', ms + 'ms')
+      );
+      results.getData = { ok: false, data: data, ms: ms };
+      cb(false);
+    }
+  });
+}
+
+// ── 6. Timing summary ───────────────────────────────────
+function showTiming() {
+  var html = '';
+  var labels = { fetch: 'fetch() ping', jsonpPing: 'JSONP ping', getMembers: 'getMembers', getData: 'getData (Reservations)' };
+  Object.keys(labels).forEach(function(k) {
+    if (timings[k] !== undefined) {
+      var ms = timings[k];
+      var b = ms < 2000 ? badge('ok', ms + 'ms ✓') : ms < 8000 ? badge('warn', ms + 'ms ⚠ slow') : badge('err', ms + 'ms ✗ very slow');
+      html += row(labels[k], b);
+    }
+  });
+  if (!html) html = row('—', 'No tests run yet');
+  setRows('timing-rows', html);
+}
+
+// ── Build copyable report ────────────────────────────────
+function buildReport() {
+  var lines = [
+    '=== SULIT ADMIN DEBUG REPORT ===',
+    'Generated: ' + new Date().toISOString(),
+    'Page: ' + location.href,
+    '',
+    '--- SCRIPT URL ---',
+    SCRIPT_URL,
+    '',
+    '--- ENVIRONMENT ---',
+    'Protocol: ' + (results.env && results.env.protocol),
+    'Host: ' + (results.env && results.env.host),
+    'Online: ' + (results.env && results.env.online),
+    '',
+    '--- TEST RESULTS ---',
+  ];
+
+  var tests = [
+    ['fetch() ping',          results.ping],
+    ['JSONP ping',            results.jsonpPing],
+    ['getMembers',            results.getMembers],
+    ['getData (Reservations)',results.getData],
+  ];
+
+  tests.forEach(function(t) {
+    var name = t[0], r = t[1];
+    if (!r) { lines.push(name + ': NOT RUN'); return; }
+    lines.push(name + ': ' + (r.ok ? 'OK' : 'FAIL') + ' (' + (r.ms || '?') + 'ms)');
+    if (r.error) lines.push('  error: ' + r.error);
+    if (r.count !== undefined) lines.push('  members: ' + r.count + ' — ' + r.names);
+    if (r.rowCount !== undefined) lines.push('  rows: ' + r.rowCount);
+    if (r.data) lines.push('  raw: ' + JSON.stringify(r.data));
+  });
+
+  lines.push('');
+  lines.push('--- TIMINGS ---');
+  Object.keys(timings).forEach(function(k) { lines.push(k + ': ' + timings[k] + 'ms'); });
+  lines.push('');
+  lines.push('=== END REPORT ===');
+
+  return lines.join('\n');
+}
+
+function copyReport() {
+  var text = buildReport();
+  document.getElementById('report-box').textContent = text;
+  document.getElementById('report-box').style.display = 'block';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      document.getElementById('copy-btn').textContent = '✅ Copied!';
+      setTimeout(function() { document.getElementById('copy-btn').textContent = '📋 Copy Full Report'; }, 2000);
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('copy-btn').textContent = '✅ Copied!';
+    setTimeout(function() { document.getElementById('copy-btn').textContent = '📋 Copy Full Report'; }, 2000);
+  }
+}
+
+// ── Run all ──────────────────────────────────────────────
+function runAll() {
+  SCRIPT_URL = document.getElementById('url-input').value.trim();
+  timings = {};
+  results = {};
+
+  checkEnv();
+
+  checkPing(function() {
+    checkJsonpPing(function() {
+      checkMembers(function() {
+        checkData(function() {
+          showTiming();
+          document.getElementById('copy-btn').style.display = 'inline-block';
+        });
+      });
+    });
+  });
+}
+
+// Auto-run on load
+window.addEventListener('DOMContentLoaded', runAll);
+</script>
+
+</body>
+</html>
