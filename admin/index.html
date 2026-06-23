@@ -333,11 +333,9 @@ tr:hover td{background:var(--gold3);cursor:pointer}
     </div>
     <div class="login-status info" id="login-msg">Select your name to begin</div>
     <div class="setup-notice" id="setup-notice">
-      <strong>Action needed:</strong> Make sure your Google Sheet has a tab named exactly <strong>Admin Users</strong> (not "Team") with columns: <strong>Name | Passcode | Role | Active</strong>.
-      Then replace the Apps Script code with <strong>sulit-apps-script-v2.gs</strong> and redeploy:
-      <strong>Deploy &rarr; Manage deployments &rarr; Edit &rarr; New version &rarr; Deploy</strong>.
-      <br><br>
-      <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="loadTeam()">&#8635; Retry loading team</span>
+      <strong>Action needed:</strong> Replace the Apps Script code with the updated
+      <strong>sulit-apps-script-v2.gs</strong>, then click <strong>Deploy &rarr; Manage deployments &rarr; Edit &rarr; New version &rarr; Deploy</strong>.
+      Your <strong>Admin Users</strong> sheet already has the right structure &mdash; no changes needed there.
     </div>
   </div>
 </div>
@@ -621,7 +619,6 @@ function loadTeam(){
   gasGet({action:'getMembers'},function(data){
     var sel=document.getElementById('member-sel');
     sel.style.color='';
-    // Check for null (timeout/network error) or script-level error FIRST
     if(!data||data.error){
       sel.innerHTML='<option value="">Could not load team</option>';
       setMsg('Could not reach script — see setup notice.','err');
@@ -793,6 +790,20 @@ function renderRent(){
   if(rentView==='board')renderBoard('rent',rows);
 }
 function fmt(v){return v||'—';}
+
+// ── ROW ACTION BUTTONS ───────────────────────────────────
+function rowBtns(type,idx,st){
+  var btns='<button class="ab ab-view" onclick="event.stopPropagation();openMod(\''+type+'\','+idx+')">View</button>';
+  if(st==='pending'){
+    btns+='<button class="ab ab-confirm" onclick="event.stopPropagation();setStatus(\''+type+'\','+idx+',\'confirmed\')">&#10003;</button>';
+    btns+='<button class="ab ab-cancel" onclick="event.stopPropagation();setStatus(\''+type+'\','+idx+',\'cancelled\')">&times;</button>';
+  }
+  if(st==='confirmed'){
+    btns+='<button class="ab ab-complete" onclick="event.stopPropagation();promptComplete(\''+type+'\','+idx+')">&#10003; Done</button>';
+    btns+='<button class="ab ab-cancel" onclick="event.stopPropagation();setStatus(\''+type+'\','+idx+',\'cancelled\')">&times;</button>';
+  }
+  return btns;
+}
 
 // ── RENDER BOARD ─────────────────────────────────────────
 function renderBoard(type,filteredRows){
@@ -1082,7 +1093,12 @@ function saveEdit(){
     r.email=document.getElementById('ef-email').value;
     r.notes=document.getElementById('ef-notes').value;
   }
-  gasGet({action:'updateRecord',sheet:modType==='res'?'Reservations':'Group Rentals',rowId:r.rowId||r._rowIndex||'',data:JSON.stringify(r)},function(d){toast('Changes saved','ok');modType==='res'?(renderRes(),renderCal()):(renderRent(),renderCal());switchMTab('details');openMod(modType,modIdx);})modType==='res'?(renderRes(),renderCal()):(renderRent(),renderCal());switchMTab('details');});
+  gasGet({action:'updateRecord',sheet:modType==='res'?'Reservations':'Group Rentals',rowId:r.rowId||r._rowIndex||'',data:JSON.stringify(r)},function(d){
+    toast('Changes saved','ok');
+    modType==='res'?(renderRes(),renderCal()):(renderRent(),renderCal());
+    switchMTab('details');
+    openMod(modType,modIdx);
+  });
 }
 
 // ── STATUS UPDATE ────────────────────────────────────────
