@@ -670,22 +670,35 @@ function loadSheet(name,cb){
   gasGet({action:'getData',sheet:name},function(d){cb((d&&d.rows)||[]);});
 }
 
-// GAS-compatible GET request — handles Google's redirect chain
+// JSONP — injects <script> tag, no CORS/redirect issues, works with Google Apps Script
+var _jsonpIdx=0;
 function gasGet(params,cb){
-  var qs=Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
-  var url=SCRIPT_URL+'?'+qs;
-  var xhr=new XMLHttpRequest();
-  xhr.open('GET',url,true);
-  xhr.onload=function(){
-    if(xhr.status>=200&&xhr.status<400){
-      try{var d=JSON.parse(xhr.responseText);cb(d);}
-      catch(e){console.error('Parse error:',xhr.responseText.substring(0,200));cb(null);}
-    }else{
-      console.error('XHR error:',xhr.status,xhr.statusText);cb(null);
-    }
+  var cbName='_gasJsonp'+(_jsonpIdx++);
+  var timeout=setTimeout(function(){
+    // Timed out — clean up and call back with null
+    if(window[cbName])window[cbName]=null;
+    var s=document.getElementById(cbName);if(s)s.remove();
+    console.warn('gasGet timeout for action:',params.action);
+    cb(null);
+  },15000);
+  window[cbName]=function(data){
+    clearTimeout(timeout);
+    window[cbName]=null;
+    var s=document.getElementById(cbName);if(s)s.remove();
+    cb(data);
   };
-  xhr.onerror=function(){console.error('XHR network error for:',url);cb(null);};
-  xhr.send();
+  params.callback=cbName;
+  var qs=Object.keys(params).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(params[k]);}).join('&');
+  var s=document.createElement('script');
+  s.id=cbName;
+  s.src=SCRIPT_URL+'?'+qs;
+  s.onerror=function(){
+    clearTimeout(timeout);
+    window[cbName]=null;s.remove();
+    console.error('gasGet script error for action:',params.action);
+    cb(null);
+  };
+  document.head.appendChild(s);
 }
 
 // GAS POST (no-cors fire-and-forget)
