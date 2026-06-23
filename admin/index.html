@@ -333,9 +333,11 @@ tr:hover td{background:var(--gold3);cursor:pointer}
     </div>
     <div class="login-status info" id="login-msg">Select your name to begin</div>
     <div class="setup-notice" id="setup-notice">
-      <strong>Action needed:</strong> Replace the Apps Script code with the updated
-      <strong>sulit-apps-script-v2.gs</strong>, then click <strong>Deploy &rarr; Manage deployments &rarr; Edit &rarr; New version &rarr; Deploy</strong>.
-      Your <strong>Admin Users</strong> sheet already has the right structure &mdash; no changes needed there.
+      <strong>Action needed:</strong> Make sure your Google Sheet has a tab named exactly <strong>Admin Users</strong> (not "Team") with columns: <strong>Name | Passcode | Role | Active</strong>.
+      Then replace the Apps Script code with <strong>sulit-apps-script-v2.gs</strong> and redeploy:
+      <strong>Deploy &rarr; Manage deployments &rarr; Edit &rarr; New version &rarr; Deploy</strong>.
+      <br><br>
+      <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="loadTeam()">&#8635; Retry loading team</span>
     </div>
   </div>
 </div>
@@ -608,29 +610,31 @@ function doAuth(){
   if(!member){setMsg('Please select your name first.','err');pin='';syncDots();return;}
   setMsg('Verifying\u2026','info');
   gasGet({action:'auth',member:member,pin:pin},function(data){
+      if(!data){setMsg('Could not reach script. Check your connection.','err');pin='';syncDots();return;}
       if(data.ok){me=member;sessionStorage.setItem('sulit_admin',member);enterDashboard(member);}
       else if(data.error&&data.error.indexOf('Admin Users')>=0){setMsg('Admin Users sheet not found — see setup notice.','err');document.getElementById('setup-notice').style.display='block';pin='';syncDots();}
       else{setMsg('Incorrect passcode. Try again.','err');shakeDots();pin='';syncDots();}
-    })
-  });
+    });
 }
 
 function loadTeam(){
   gasGet({action:'getMembers'},function(data){
-      var sel=document.getElementById('member-sel');
-      sel.style.color='';
-      if(data.members&&data.members.length){
-        sel.innerHTML='<option value="">Select your name</option>';
-        data.members.forEach(function(m){var o=document.createElement('option');o.value=m.name;o.textContent=m.name;sel.appendChild(o);});
-        setMsg('Select your name to begin','info');
-      }else{
-        sel.innerHTML='<option value="">No team members found</option>';
-        setMsg('Admin Users sheet missing or empty — see setup notice.','err');
-        document.getElementById('setup-notice').style.display='block';
-      }
+    var sel=document.getElementById('member-sel');
+    sel.style.color='';
+    // Check for null (timeout/network error) or script-level error FIRST
     if(!data||data.error){
-      document.getElementById('member-sel').innerHTML='<option value="">Could not load team</option>';
+      sel.innerHTML='<option value="">Could not load team</option>';
       setMsg('Could not reach script — see setup notice.','err');
+      document.getElementById('setup-notice').style.display='block';
+      return;
+    }
+    if(data.members&&data.members.length){
+      sel.innerHTML='<option value="">Select your name</option>';
+      data.members.forEach(function(m){var o=document.createElement('option');o.value=m.name;o.textContent=m.name;sel.appendChild(o);});
+      setMsg('Select your name to begin','info');
+    }else{
+      sel.innerHTML='<option value="">No team members found</option>';
+      setMsg('Admin Users sheet missing or empty — see setup notice.','err');
       document.getElementById('setup-notice').style.display='block';
     }
   });
