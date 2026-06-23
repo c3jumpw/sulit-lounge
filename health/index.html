@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sulit Lounge — System Health</title>
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg0: #07060A;
+  --bg1: #0F0C14;
+  --bg2: #171220;
+  --bg3: #1F1830;
+  --gold: #C8922A;
+  --gold-dim: rgba(200,146,42,0.15);
+  --gold-border: rgba(200,146,42,0.22);
+  --cream: #EDE6D8;
+  --cream5: rgba(237,230,216,0.55);
+  --cream3: rgba(237,230,216,0.3);
+  --cream1: rgba(237,230,216,0.08);
+  --green: #4ecb7a;
+  --green-dim: rgba(78,203,122,0.12);
+  --red: #e06060;
+  --red-dim: rgba(224,96,96,0.12);
+  --amber: #d4942a;
+  --amber-dim: rgba(212,148,42,0.12);
+  --blue: #6fa8dc;
+  --blue-dim: rgba(111,168,220,0.12);
+  --purple: #9b7fd4;
+  --radius: 5px;
+  --font-mono: 'Courier New', Courier, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg0); color: var(--cream); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+a { color: var(--gold); }
+
+/* ── LAYOUT ── */
+.shell { display: flex; min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px; flex-shrink: 0; background: var(--bg1);
+  border-right: 1px solid var(--gold-border);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 22px 18px 16px;
+  border-bottom: 1px solid var(--gold-border);
+}
+.sidebar-logo .wordmark { font-family: Georgia, serif; font-size: 15px; color: var(--cream); letter-spacing: .04em; }
+.sidebar-logo .sub { font-size: 9px; color: var(--gold); letter-spacing: .25em; text-transform: uppercase; margin-top: 2px; }
+.nav { flex: 1; padding: 12px 0; }
+.nav-section { font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--cream3); padding: 14px 18px 5px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 18px; font-size: 12px; color: var(--cream5);
+  cursor: pointer; border-left: 2px solid transparent;
+  transition: all .15s; user-select: none;
+}
+.nav-item:hover { color: var(--cream); background: var(--cream1); }
+.nav-item.active { color: var(--gold); border-left-color: var(--gold); background: var(--gold-dim); }
+.nav-item .icon { font-size: 14px; width: 16px; text-align: center; }
+.nav-item .badge-dot {
+  margin-left: auto; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--red); display: none;
+}
+.nav-item .badge-dot.show { display: block; }
+
+.sidebar-foot {
+  padding: 14px 18px; border-top: 1px solid var(--gold-border);
+  font-size: 10px; color: var(--cream3); line-height: 1.6;
+}
+.sidebar-foot strong { color: var(--cream5); }
+
+/* ── MAIN ── */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--bg1); border-bottom: 1px solid var(--gold-border);
+  padding: 12px 24px; display: flex; align-items: center;
+  justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100;
+}
+.topbar-left h2 { font-family: Georgia, serif; font-size: 17px; font-weight: 400; color: var(--cream); }
+.topbar-left p { font-size: 11px; color: var(--cream3); margin-top: 2px; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.run-btn {
+  padding: 8px 18px; background: var(--gold); color: var(--bg0);
+  border: none; border-radius: var(--radius); font-size: 11px;
+  font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer; transition: background .15s; white-space: nowrap;
+}
+.run-btn:hover { background: #d9a03c; }
+.run-btn:disabled { background: var(--bg3); color: var(--cream3); cursor: not-allowed; }
+.last-run { font-size: 11px; color: var(--cream3); white-space: nowrap; }
+.status-pill {
+  padding: 4px 10px; border-radius: 20px; font-size: 10px;
+  font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+}
+.pill-ok     { background: var(--green-dim); color: var(--green); border: 1px solid rgba(78,203,122,.25); }
+.pill-warn   { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(212,148,42,.25); }
+.pill-err    { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(224,96,96,.25); }
+.pill-idle   { background: var(--cream1);    color: var(--cream3); border: 1px solid rgba(237,230,216,.1); }
+
+/* ── PANELS ── */
+.panel { display: none; padding: 22px 24px; }
+.panel.active { display: block; }
+
+/* ── OVERVIEW GRID ── */
+.overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.metric-card {
+  background: var(--bg2); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); padding: 16px;
+}
+.metric-card .m-label { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--cream3); margin-bottom: 6px; }
+.metric-card .m-value { font-size: 26px; font-weight: 700; color: var(--gold); font-family: var(--font-mono); }
+.metric-card .m-sub { font-size: 11px; color: var(--cream5); margin-top: 4px; }
+.metric-card.ok-card   { border-color: rgba(78,203,122,.25); }
+.metric-card.err-card  { border-color: rgba(224,96,96,.3); }
+.metric-card.warn-card { border-color: rgba(212,148,42,.3); }
+
+/* ── SECTION HEADERS ── */
+.sec-hdr {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 9px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--gold-border);
+}
+.sec-hdr .sec-icon { font-size: 13px; }
+
+/* ── TEST CARDS ── */
+.test-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+.test-card {
+  background: var(--bg2); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.test-card-hdr {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; cursor: pointer; user-select: none;
+}
+.test-card-hdr:hover { background: var(--cream1); }
+.test-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--bg3); border: 1px solid var(--gold-border);
+  font-size: 10px; font-weight: 700; color: var(--cream5);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.test-name { flex: 1; font-size: 13px; color: var(--cream); }
+.test-desc { font-size: 11px; color: var(--cream3); }
+.test-ms { font-size: 11px; color: var(--cream3); font-family: var(--font-mono); white-space: nowrap; }
+.test-badge {
+  padding: 3px 8px; border-radius: 2px; font-size: 9px;
+  font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+}
+.tb-ok   { background: var(--green-dim); color: var(--green); border: 1px solid rgba(78,203,122,.3); }
+.tb-err  { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(224,96,96,.3); }
+.tb-warn { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(212,148,42,.3); }
+.tb-wait { background: var(--cream1);    color: var(--cream3); border: 1px solid rgba(237,230,216,.1); }
+.tb-run  { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(111,168,220,.3); }
+
+.test-body { display: none; border-top: 1px solid var(--gold-border); }
+.test-body.open { display: block; }
+.test-rows { padding: 12px 16px; }
+.tr { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(200,146,42,.05); font-size: 12px; }
+.tr:last-child { border-bottom: none; }
+.tl { color: var(--cream3); width: 160px; flex-shrink: 0; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; padding-top: 1px; }
+.tv { flex: 1; word-break: break-all; line-height: 1.5; color: var(--cream); }
+pre.raw {
+  background: var(--bg3); border: 1px solid rgba(200,146,42,.12);
+  border-radius: 3px; padding: 10px; font-size: 10px;
+  font-family: var(--font-mono); color: var(--cream5);
+  overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+  margin-top: 6px; max-height: 160px; overflow-y: auto;
+}
+.fix-box {
+  background: rgba(212,148,42,.06); border: 1px solid rgba(212,148,42,.2);
+  border-radius: 3px; padding: 10px 12px; font-size: 11px;
+  color: var(--amber); line-height: 1.7; margin-top: 8px;
+}
+.fix-box strong { color: var(--cream); }
+
+/* ── SPIN ── */
+.spin { animation: spin .8s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SCHEDULE ── */
+.schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.sch-card {
+  background: var(--bg2); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); padding: 16px;
+}
+.sch-card h4 { font-size: 12px; color: var(--cream); margin-bottom: 8px; }
+.sch-card p { font-size: 11px; color: var(--cream5); line-height: 1.7; }
+.sch-card .sch-freq {
+  display: inline-block; margin-top: 8px; padding: 3px 9px;
+  background: var(--gold-dim); border: 1px solid var(--gold-border);
+  border-radius: 2px; font-size: 9px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gold);
+}
+.checklist { margin-top: 8px; }
+.checklist li {
+  font-size: 11px; color: var(--cream5); line-height: 1.8;
+  list-style: none; padding-left: 16px; position: relative;
+}
+.checklist li::before { content: '→'; position: absolute; left: 0; color: var(--gold); font-size: 10px; }
+
+/* ── REPORT ── */
+.report-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.act-btn {
+  padding: 8px 16px; border-radius: var(--radius); font-size: 11px;
+  font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  cursor: pointer; border: 1px solid var(--gold-border);
+  background: transparent; color: var(--gold); transition: all .15s;
+}
+.act-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
+.act-btn.primary { background: var(--gold); color: var(--bg0); border-color: var(--gold); }
+.act-btn.primary:hover { background: #d9a03c; }
+.act-btn:disabled { opacity: .4; cursor: not-allowed; }
+.report-output {
+  background: var(--bg2); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); padding: 18px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--cream5);
+  white-space: pre-wrap; word-break: break-all;
+  line-height: 1.7; min-height: 200px; max-height: 60vh; overflow-y: auto;
+}
+.report-intro {
+  background: var(--bg2); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+  font-size: 12px; color: var(--cream5); line-height: 1.8;
+}
+.report-intro strong { color: var(--cream); }
+.report-intro code {
+  background: var(--bg3); padding: 1px 6px; border-radius: 2px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--gold);
+}
+
+/* ── CONFIG ── */
+.config-form { max-width: 600px; }
+.cf-field { margin-bottom: 16px; }
+.cf-field label { display: block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--cream5); margin-bottom: 6px; }
+.cf-field input, .cf-field select {
+  width: 100%; background: var(--bg2); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); color: var(--cream); font-family: var(--font-mono);
+  font-size: 12px; padding: 10px 12px; outline: none; transition: border-color .15s;
+}
+.cf-field input:focus, .cf-field select:focus { border-color: var(--gold); }
+.cf-field .cf-hint { font-size: 10px; color: var(--cream3); margin-top: 5px; line-height: 1.6; }
+
+/* ── HISTORY ── */
+.history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.history-table th {
+  background: var(--bg2); color: var(--cream3); font-size: 9px;
+  letter-spacing: .14em; text-transform: uppercase; padding: 8px 12px;
+  text-align: left; border-bottom: 1px solid var(--gold-border); white-space: nowrap;
+}
+.history-table td {
+  padding: 9px 12px; border-bottom: 1px solid rgba(200,146,42,.05);
+  color: var(--cream); vertical-align: middle;
+}
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: var(--cream1); }
+.tbl-wrap { border: 1px solid var(--gold-border); border-radius: var(--radius); overflow: hidden; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 760px) {
+  .sidebar { display: none; }
+  .schedule-grid { grid-template-columns: 1fr; }
+  .topbar-left p { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══ SIDEBAR ════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="wordmark">Sulit Lounge</div>
+    <div class="sub">System Health</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Diagnostics</div>
+    <div class="nav-item active" onclick="showPanel('overview')" id="nav-overview">
+      <span class="icon">◉</span> Overview
+      <span class="badge-dot" id="dot-overview"></span>
+    </div>
+    <div class="nav-item" onclick="showPanel('tests')" id="nav-tests">
+      <span class="icon">⚙</span> Connection Tests
+      <span class="badge-dot" id="dot-tests"></span>
+    </div>
+    <div class="nav-item" onclick="showPanel('data')" id="nav-data">
+      <span class="icon">⊞</span> Data Integrity
+      <span class="badge-dot" id="dot-data"></span>
+    </div>
+
+    <div class="nav-section">Reports</div>
+    <div class="nav-item" onclick="showPanel('report')" id="nav-report">
+      <span class="icon">☰</span> Generate Report
+    </div>
+    <div class="nav-item" onclick="showPanel('history')" id="nav-history">
+      <span class="icon">⏱</span> Run History
+    </div>
+
+    <div class="nav-section">Admin</div>
+    <div class="nav-item" onclick="showPanel('schedule')" id="nav-schedule">
+      <span class="icon">◷</span> Maintenance Schedule
+    </div>
+    <div class="nav-item" onclick="showPanel('config')" id="nav-config">
+      <span class="icon">✎</span> Configuration
+    </div>
+  </nav>
+  <div class="sidebar-foot">
+    <strong>v2.0</strong> — Sulit System Health<br>
+    Run every 2–3 days.<br>
+    Keep this file private.
+  </div>
+</aside>
+
+<!-- ══ MAIN ══════════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2 id="panel-title">System Overview</h2>
+      <p id="panel-desc">Connection, data integrity, and script health</p>
+    </div>
+    <div class="topbar-right">
+      <span class="last-run" id="last-run-label">Never run</span>
+      <span class="status-pill pill-idle" id="global-status">Idle</span>
+      <button class="run-btn" id="run-btn" onclick="runDiagnostics()">▶ Run Diagnostics</button>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: OVERVIEW ══ -->
+  <div class="panel active" id="panel-overview">
+
+    <div class="overview-grid" id="overview-metrics">
+      <div class="metric-card">
+        <div class="m-label">Last Run</div>
+        <div class="m-value" id="ov-last" style="font-size:14px;margin-top:4px">—</div>
+        <div class="m-sub">Click Run Diagnostics to begin</div>
+      </div>
+      <div class="metric-card">
+        <div class="m-label">Tests Passed</div>
+        <div class="m-value" id="ov-passed">—</div>
+        <div class="m-sub" id="ov-passed-sub">of — total</div>
+      </div>
+      <div class="metric-card">
+        <div class="m-label">Script Latency</div>
+        <div class="m-value" id="ov-latency">—</div>
+        <div class="m-sub" id="ov-latency-sub">JSONP ping response</div>
+      </div>
+      <div class="metric-card">
+        <div class="m-label">Members Loaded</div>
+        <div class="m-value" id="ov-members">—</div>
+        <div class="m-sub" id="ov-members-sub">from Admin Users sheet</div>
+      </div>
+      <div class="metric-card">
+        <div class="m-label">Reservations</div>
+        <div class="m-value" id="ov-res">—</div>
+        <div class="m-sub">rows in sheet</div>
+      </div>
+      <div class="metric-card">
+        <div class="m-label">Group Rentals</div>
+        <div class="m-value" id="ov-rent">—</div>
+        <div class="m-sub">rows in sheet</div>
+      </div>
+    </div>
+
+    <div class="sec-hdr"><span class="sec-icon">⚠</span> Issues Found</div>
+    <div id="ov-issues" style="font-size:12px;color:var(--cream3);padding:16px;background:var(--bg2);border:1px solid var(--gold-border);border-radius:var(--radius)">
+      Run diagnostics to check for issues.
+    </div>
+
+  </div>
+
+  <!-- ══ PANEL: CONNECTION TESTS ══ -->
+  <div class="panel" id="panel-tests">
+    <div class="sec-hdr"><span class="sec-icon">⚙</span> Connection &amp; Script Tests</div>
+    <div class="test-list" id="test-list">
+
+      <div class="test-card" id="tc-env">
+        <div class="test-card-hdr" onclick="toggleTestBody('env')">
+          <div class="test-num">1</div>
+          <div style="flex:1"><div class="test-name">Browser Environment</div><div class="test-desc">Protocol, online status, and configuration checks</div></div>
+          <span class="test-badge tb-wait" id="tbadge-env">Pending</span>
+        </div>
+        <div class="test-body" id="tbody-env"><div class="test-rows" id="trows-env"></div></div>
+      </div>
+
+      <div class="test-card" id="tc-fetch">
+        <div class="test-card-hdr" onclick="toggleTestBody('fetch')">
+          <div class="test-num">2</div>
+          <div style="flex:1"><div class="test-name">Network Reachability</div><div class="test-desc">fetch() to Google Apps Script endpoint</div></div>
+          <span class="test-ms" id="tms-fetch"></span>
+          <span class="test-badge tb-wait" id="tbadge-fetch">Pending</span>
+        </div>
+        <div class="test-body" id="tbody-fetch"><div class="test-rows" id="trows-fetch"></div></div>
+      </div>
+
+      <div class="test-card" id="tc-jsonp">
+        <div class="test-card-hdr" onclick="toggleTestBody('jsonp')">
+          <div class="test-num">3</div>
+          <div style="flex:1"><div class="test-name">Script Ping (JSONP)</div><div class="test-desc">Verifies the Apps Script is deployed and responding</div></div>
+          <span class="test-ms" id="tms-jsonp"></span>
+          <span class="test-badge tb-wait" id="tbadge-jsonp">Pending</span>
+        </div>
+        <div class="test-body" id="tbody-jsonp"><div class="test-rows" id="trows-jsonp"></div></div>
+      </div>
+
+      <div class="test-card" id="tc-members">
+        <div class="test-card-hdr" onclick="toggleTestBody('members')">
+          <div class="test-num">4</div>
+          <div style="flex:1"><div class="test-name">Admin Users Sheet</div><div class="test-desc">getMembers — verifies "Admin Users" tab exists and returns names</div></div>
+          <span class="test-ms" id="tms-members"></span>
+          <span class="test-badge tb-wait" id="tbadge-members">Pending</span>
+        </div>
+        <div class="test-body" id="tbody-members"><div class="test-rows" id="trows-members"></div></div>
+      </div>
+
+      <div class="test-card" id="tc-res">
+        <div class="test-card-hdr" onclick="toggleTestBody('res')">
+          <div class="test-num">5</div>
+          <div style="flex:1"><div class="test-name">Reservations Sheet</div><div class="test-desc">getData — reads the Reservations tab and checks structure</div></div>
+          <span class="test-ms" id="tms-res"></span>
+          <span class="test-badge tb-wait" id="tbadge-res">Pending</span>
+        </div>
+        <div class="test-body" id="tbody-res"><div class="test-rows" id="trows-res"></div></div>
+      </div>
+
+      <div class="test-card" id="tc-rent">
+        <div class="test-card-hdr" onclick="toggleTestBody('rent')">
+          <div class="test-num">6</div>
+          <div style="flex:1"><div class="test-name">Group Rentals Sheet</div><div class="test-desc">getData — reads the Group Rentals tab and checks structure</div></div>
+          <span class="test-ms" id="tms-rent"></span>
+          <span class="test-badge tb-wait" id="tbadge-rent">Pending</span>
+        </div>
+        <div class="test-body" id="tbody-rent"><div class="test-rows" id="trows-rent"></div></div>
+      </div>
+
+      <div class="test-card" id="tc-auth">
+        <div class="test-card-hdr" onclick="toggleTestBody('auth')">
+          <div class="test-num">7</div>
+          <div style="flex:1"><div class="test-name">Auth Flow Check</div><div class="test-desc">Simulates a bad-PIN auth to confirm the endpoint responds correctly</div></div>
+          <span class="test-ms" id="tms-auth"></span>
+          <span class="test-badge tb-wait" id="tbadge-auth">Pending</span>
+        </div>
+        <div class="test-body" id="tbody-auth"><div class="test-rows" id="trows-auth"></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ PANEL: DATA INTEGRITY ══ -->
+  <div class="panel" id="panel-data">
+    <div class="sec-hdr"><span class="sec-icon">⊞</span> Data Integrity Checks</div>
+    <div id="data-integrity-output" style="font-size:12px;color:var(--cream3);padding:20px;background:var(--bg2);border:1px solid var(--gold-border);border-radius:var(--radius)">
+      Run diagnostics first.
+    </div>
+  </div>
+
+  <!-- ══ PANEL: REPORT ══ -->
+  <div class="panel" id="panel-report">
+
+    <div class="report-intro">
+      <strong>How to use this report with AI:</strong><br>
+      1. Click <strong>Generate Report</strong> below, then <strong>Copy to Clipboard</strong>.<br>
+      2. Open a new chat with Claude (or your AI of choice).<br>
+      3. Paste the report and add your question — e.g. <code>"The getMembers test is failing. What should I check?"</code><br>
+      4. The report includes full raw responses, timings, and a system snapshot so the AI has everything it needs to diagnose and fix any issue.<br><br>
+      <strong>For recurring issues:</strong> paste the last 2–3 reports together to show the AI a pattern over time.
+    </div>
+
+    <div class="report-actions">
+      <button class="act-btn primary" onclick="generateReport()" id="gen-report-btn">☰ Generate Report</button>
+      <button class="act-btn" onclick="copyReport()" id="copy-report-btn" disabled>📋 Copy to Clipboard</button>
+      <button class="act-btn" onclick="downloadReport()" id="dl-report-btn" disabled>⬇ Download .txt</button>
+      <button class="act-btn" onclick="clearReport()" id="clear-report-btn" disabled>✕ Clear</button>
+    </div>
+
+    <div class="report-output" id="report-output">Report will appear here after running diagnostics and clicking Generate Report.</div>
+  </div>
+
+  <!-- ══ PANEL: HISTORY ══ -->
+  <div class="panel" id="panel-history">
+    <div class="sec-hdr"><span class="sec-icon">⏱</span> Run History (this session)</div>
+    <div class="tbl-wrap">
+      <table class="history-table">
+        <thead><tr>
+          <th>#</th><th>Timestamp</th><th>Tests Passed</th>
+          <th>Members</th><th>Res Rows</th><th>Rent Rows</th>
+          <th>Latency</th><th>Overall</th>
+        </tr></thead>
+        <tbody id="history-body">
+          <tr><td colspan="8" style="text-align:center;color:var(--cream3);padding:24px">No runs yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: SCHEDULE ══ -->
+  <div class="panel" id="panel-schedule">
+    <div class="sec-hdr"><span class="sec-icon">◷</span> Recommended Maintenance Schedule</div>
+    <div class="schedule-grid">
+
+      <div class="sch-card">
+        <h4>Every 2–3 Days</h4>
+        <p>Routine health check. Run all diagnostics, review timings and member count. Generate and save a report if anything looks unusual.</p>
+        <span class="sch-freq">Routine</span>
+        <ul class="checklist">
+          <li>Run full diagnostics</li>
+          <li>Check all tests pass</li>
+          <li>Confirm member names load</li>
+          <li>Verify Reservations &amp; Rentals row counts match spreadsheet</li>
+          <li>Note any latency above 5s</li>
+        </ul>
+      </div>
+
+      <div class="sch-card">
+        <h4>Weekly</h4>
+        <p>Deeper check. Review data integrity, open the spreadsheet directly, confirm no sheet tabs have been renamed or deleted.</p>
+        <span class="sch-freq">Weekly</span>
+        <ul class="checklist">
+          <li>Run diagnostics + generate report</li>
+          <li>Open spreadsheet, verify tab names: <em>Reservations, Group Rentals, Admin Users, Newsletter</em></li>
+          <li>Check Admin Users has active entries</li>
+          <li>Confirm no duplicate rows in sheets</li>
+          <li>Review any pending reservations</li>
+        </ul>
+      </div>
+
+      <div class="sch-card">
+        <h4>Monthly</h4>
+        <p>Script maintenance. Google Apps Script deployments can expire or need re-authorisation. Re-deploy as a new version monthly.</p>
+        <span class="sch-freq">Monthly</span>
+        <ul class="checklist">
+          <li>Open Google Apps Script editor</li>
+          <li>Deploy → Manage deployments → Edit → New version → Deploy</li>
+          <li>Confirm "Execute as: Me" and "Access: Anyone"</li>
+          <li>Update SCRIPT_URL in admin/index.html if it changed</li>
+          <li>Run full diagnostics after redeployment</li>
+          <li>Archive completed/cancelled entries via admin Data tab</li>
+        </ul>
+      </div>
+
+      <div class="sch-card">
+        <h4>If Something Breaks</h4>
+        <p>Run diagnostics immediately, generate a report, and paste it to Claude with a description of what stopped working.</p>
+        <span class="sch-freq" style="background:var(--red-dim);color:var(--red);border-color:rgba(224,96,96,.3)">Incident</span>
+        <ul class="checklist">
+          <li>Run diagnostics — identify which test fails</li>
+          <li>Generate report → Copy → Paste to Claude</li>
+          <li>Describe what the user saw (e.g. "dropdown stuck on Loading")</li>
+          <li>Include any recent changes (renamed sheet, new deployment, etc.)</li>
+          <li>Check Apps Script executions log for errors</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="sec-hdr" style="margin-top:8px"><span class="sec-icon">⚠</span> Common Failure Modes &amp; Quick Fixes</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="fix-box">
+        <strong>Dropdown stuck on "Loading team…"</strong><br>
+        Cause: Apps Script not deployed, wrong sheet name, or JS syntax error in admin/index.html.<br>
+        Fix: Run diagnostics → check Test 3 (JSONP Ping) and Test 4 (Admin Users). Redeploy script if needed.
+      </div>
+      <div class="fix-box">
+        <strong>Test 3 fails (JSONP timeout)</strong><br>
+        Cause: Script not deployed as "Anyone", or deployment URL changed.<br>
+        Fix: Apps Script → Deploy → Manage → confirm "Who has access: Anyone". Copy new /exec URL into admin/index.html.
+      </div>
+      <div class="fix-box">
+        <strong>Test 4 fails ("Admin Users sheet not found")</strong><br>
+        Cause: Sheet tab renamed or deleted.<br>
+        Fix: Open spreadsheet, rename the staff tab exactly to <code>Admin Users</code> (case-sensitive).
+      </div>
+      <div class="fix-box">
+        <strong>Latency above 8 seconds</strong><br>
+        Cause: Google Apps Script cold start, spreadsheet has too many rows, or script has execution errors.<br>
+        Fix: Check Apps Script executions log. Archive old completed rows via admin → Data tab.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: CONFIG ══ -->
+  <div class="panel" id="panel-config">
+    <div class="sec-hdr"><span class="sec-icon">✎</span> Configuration</div>
+    <div class="config-form">
+      <div class="cf-field">
+        <label>Google Apps Script URL</label>
+        <input type="text" id="cfg-url" placeholder="https://script.google.com/macros/s/…/exec">
+        <div class="cf-hint">The /exec URL from your Apps Script deployment. Found under Deploy → Manage deployments.</div>
+      </div>
+      <div class="cf-field">
+        <label>System Name</label>
+        <input type="text" id="cfg-name" value="Sulit Lounge">
+        <div class="cf-hint">Used in generated reports.</div>
+      </div>
+      <div class="cf-field">
+        <label>Spreadsheet URL (for reference)</label>
+        <input type="text" id="cfg-sheet-url" value="https://docs.google.com/spreadsheets/d/14DrhHqi7PbK4ELkUtreE0K7W1SH2xn2aqxCtJA3djOA">
+        <div class="cf-hint">Direct link to the master spreadsheet. Not used in tests — for your reference only.</div>
+      </div>
+      <div class="cf-field">
+        <label>Admin Site URL</label>
+        <input type="text" id="cfg-admin-url" value="https://c3jumpw.github.io/sulit-lounge/admin/">
+        <div class="cf-hint">Used in reports as a reference link.</div>
+      </div>
+      <div class="cf-field">
+        <label>Timeout per test (ms)</label>
+        <input type="number" id="cfg-timeout" value="15000" min="5000" max="30000" step="1000">
+        <div class="cf-hint">How long to wait before marking a test as timed out. Default: 15000ms (15 seconds).</div>
+      </div>
+      <button class="act-btn primary" onclick="saveConfig()">Save Configuration</button>
+      <span id="cfg-saved" style="font-size:11px;color:var(--green);margin-left:10px;display:none">✓ Saved</span>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ══ STATE ════════════════════════════════════════════════
+var DEFAULTS = {
+  url: 'https://script.google.com/macros/s/AKfycbzujLbZ7-o84n312UW5MuXorsEROWLIhUIlWO2_Soz4yKMsTtOGCXB1sbxpzNmTfnqgiQ/exec',
+  name: 'Sulit Lounge',
+  sheetUrl: 'https://docs.google.com/spreadsheets/d/14DrhHqi7PbK4ELkUtreE0K7W1SH2xn2aqxCtJA3djOA',
+  adminUrl: 'https://c3jumpw.github.io/sulit-lounge/admin/',
+  timeout: 15000
+};
+
+var cfg = {};
+var results = {};
+var timings = {};
+var runHistory = [];
+var _cbIdx = 0;
+var isRunning = false;
+var reportText = '';
+
+// ══ CONFIG ════════════════════════════════════════════════
+function loadConfig() {
+  try {
+    var saved = localStorage.getItem('sulit_health_cfg');
+    cfg = saved ? Object.assign({}, DEFAULTS, JSON.parse(saved)) : Object.assign({}, DEFAULTS);
+  } catch(e) { cfg = Object.assign({}, DEFAULTS); }
+  document.getElementById('cfg-url').value = cfg.url;
+  document.getElementById('cfg-name').value = cfg.name;
+  document.getElementById('cfg-sheet-url').value = cfg.sheetUrl;
+  document.getElementById('cfg-admin-url').value = cfg.adminUrl;
+  document.getElementById('cfg-timeout').value = cfg.timeout;
+}
+
+function saveConfig() {
+  cfg.url = document.getElementById('cfg-url').value.trim();
+  cfg.name = document.getElementById('cfg-name').value.trim();
+  cfg.sheetUrl = document.getElementById('cfg-sheet-url').value.trim();
+  cfg.adminUrl = document.getElementById('cfg-admin-url').value.trim();
+  cfg.timeout = parseInt(document.getElementById('cfg-timeout').value) || 15000;
+  try { localStorage.setItem('sulit_health_cfg', JSON.stringify(cfg)); } catch(e) {}
+  var s = document.getElementById('cfg-saved');
+  s.style.display = 'inline';
+  setTimeout(function() { s.style.display = 'none'; }, 2000);
+}
+
+// ══ NAV ══════════════════════════════════════════════════
+var panelMeta = {
+  overview:  { title: 'System Overview',        desc: 'Connection, data integrity, and script health at a glance' },
+  tests:     { title: 'Connection Tests',        desc: 'Detailed diagnostics for each component — click a test to expand' },
+  data:      { title: 'Data Integrity',          desc: 'Sheet structure validation and row-level checks' },
+  report:    { title: 'Generate Report',         desc: 'Full diagnostic report for archiving or pasting to AI for help' },
+  history:   { title: 'Run History',             desc: 'Results from all runs this session' },
+  schedule:  { title: 'Maintenance Schedule',    desc: 'What to check and when — including common fixes' },
+  config:    { title: 'Configuration',           desc: 'Script URL, system name, and test settings' }
+};
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  var m = panelMeta[id];
+  document.getElementById('panel-title').textContent = m.title;
+  document.getElementById('panel-desc').textContent = m.desc;
+}
+
+function toggleTestBody(id) {
+  var el = document.getElementById('tbody-' + id);
+  el.classList.toggle('open');
+}
+
+// ══ JSONP HELPER ═════════════════════════════════════════
+function jsonpGet(action, extraParams, cb) {
+  var cbName = '_sh_cb' + (_cbIdx++);
+  var start = Date.now();
+  var done = false;
+  var url = cfg.url;
+
+  var timer = setTimeout(function() {
+    if (done) return; done = true; cleanup();
+    cb(null, Date.now() - start, 'Timeout after ' + cfg.timeout + 'ms — script may be unresponsive, undeployed, or access restricted');
+  }, cfg.timeout);
+
+  window[cbName] = function(data) {
+    if (done) return; done = true; clearTimeout(timer); cleanup();
+    cb(data, Date.now() - start, null);
+  };
+
+  var params = 'action=' + action + '&callback=' + cbName;
+  if (extraParams) params += '&' + extraParams;
+  params += '&_nc=' + start;
+
+  var s = document.createElement('script');
+  s.id = 'sh_s_' + cbName;
+  s.src = url + '?' + params;
+  s.onerror = function() {
+    if (done) return; done = true; clearTimeout(timer); cleanup();
+    cb(null, Date.now() - start, 'Script tag load error — URL invalid or script not deployed with "Anyone" access');
+  };
+  document.head.appendChild(s);
+
+  function cleanup() {
+    window[cbName] = null;
+    var el = document.getElementById('sh_s_' + cbName);
+    if (el) el.remove();
+  }
+}
+
+// ══ BADGE / ROW HELPERS ══════════════════════════════════
+function setBadge(id, type, text) {
+  var el = document.getElementById('tbadge-' + id);
+  el.className = 'test-badge tb-' + type;
+  el.textContent = text;
+}
+
+function setMs(id, ms) {
+  var el = document.getElementById('tms-' + id);
+  if (el) el.textContent = ms ? ms + 'ms' : '';
+}
+
+function setRows(id, html) {
+  document.getElementById('trows-' + id).innerHTML = html;
+  document.getElementById('tbody-' + id).classList.add('open');
+}
+
+function tr(label, val) {
+  return '<div class="tr"><span class="tl">' + label + '</span><span class="tv">' + val + '</span></div>';
+}
+
+function badge(cls, text) {
+  return '<span class="test-badge tb-' + cls + '">' + text + '</span>';
+}
+
+function raw(obj) {
+  return '<pre class="raw">' + JSON.stringify(obj, null, 2) + '</pre>';
+}
+
+function fix(msg) {
+  return '<div class="fix-box">⚠ <strong>Suggested fix:</strong> ' + msg + '</div>';
+}
+
+// ══ TESTS ════════════════════════════════════════════════
+
+// ── T1: Environment ──────────────────────────────────────
+function testEnv() {
+  setBadge('env', 'run', '● Running');
+  var online = navigator.onLine;
+  var proto = location.protocol;
+  var host = location.hostname;
+  var urlSet = !!cfg.url && cfg.url.indexOf('script.google.com') >= 0;
+
+  var issues = [];
+  if (!online) issues.push('Browser reports offline');
+  if (proto !== 'https:') issues.push('Not served over HTTPS — some browser security features may block script requests');
+  if (!urlSet) issues.push('Script URL looks wrong — check Configuration tab');
+
+  var html = '';
+  html += tr('Page host', host || '<em>(local file)</em>');
+  html += tr('Protocol', proto + ' ' + (proto === 'https:' ? badge('ok','HTTPS ✓') : badge('warn','Not HTTPS')));
+  html += tr('Browser online', online ? badge('ok','Yes ✓') : badge('err','Offline ✗'));
+  html += tr('Script URL', urlSet ? badge('ok','Configured ✓') : badge('err','Check config ✗'));
+  html += tr('Script URL value', '<span style="font-size:10px;font-family:var(--font-mono);color:var(--cream3)">' + cfg.url.substring(0, 80) + '…</span>');
+
+  if (issues.length) {
+    html += fix(issues.join(' | '));
+    setBadge('env', 'warn', '⚠ Warning');
+    results.env = { ok: false, issues: issues };
+  } else {
+    setBadge('env', 'ok', '✓ Pass');
+    results.env = { ok: true };
+  }
+  setRows('env', html);
+  return !issues.length;
+}
+
+// ── T2: fetch ping ───────────────────────────────────────
+function testFetch(cb) {
+  setBadge('fetch', 'run', '<span class="spin">↻</span> Running');
+  var start = Date.now();
+  fetch(cfg.url + '?action=ping&_nc=' + start, { method: 'GET', mode: 'no-cors' })
+    .then(function(r) {
+      var ms = Date.now() - start;
+      timings.fetch = ms;
+      setMs('fetch', ms);
+      var html = tr('Result', badge('ok','Reachable ✓')) +
+        tr('Response type', r.type + ' (opaque = normal for no-cors)') +
+        tr('Time', ms + 'ms ' + (ms < 3000 ? badge('ok','Fast') : badge('warn','Slow')));
+      setRows('fetch', html);
+      setBadge('fetch', 'ok', '✓ Pass');
+      results.fetch = { ok: true, ms: ms };
+      cb(true);
+    })
+    .catch(function(e) {
+      var ms = Date.now() - start;
+      timings.fetch = ms;
+      setMs('fetch', ms);
+      var html = tr('Result', badge('err','Network error ✗')) +
+        tr('Error', e.message) + tr('Time', ms + 'ms') +
+        fix('Script may not be deployed as "Anyone". Check: Apps Script → Deploy → Manage → Who has access: Anyone');
+      setRows('fetch', html);
+      setBadge('fetch', 'err', '✗ Fail');
+      results.fetch = { ok: false, error: e.message, ms: ms };
+      cb(false);
+    });
+}
+
+// ── T3: JSONP ping ───────────────────────────────────────
+function testJsonpPing(cb) {
+  setBadge('jsonp', 'run', '<span class="spin">↻</span> Running');
+  jsonpGet('ping', '', function(data, ms, err) {
+    timings.jsonpPing = ms;
+    setMs('jsonp', ms);
+    if (err) {
+      var html = tr('Result', badge('err','Failed ✗')) + tr('Error', err) + tr('Time', ms + 'ms') +
+        fix('Redeploy the Apps Script: Deploy → Manage deployments → Edit → New version → Execute as: Me, Access: Anyone → Deploy. Then update SCRIPT_URL in admin/index.html.');
+      setRows('jsonp', html);
+      setBadge('jsonp', 'err', '✗ Fail');
+      results.jsonpPing = { ok: false, error: err, ms: ms };
+      cb(false);
+    } else if (data && data.ok) {
+      var html = tr('Result', badge('ok','Script live ✓')) + tr('Message', data.msg || '—') + tr('Time', ms + 'ms') + tr('Raw response', raw(data));
+      setRows('jsonp', html);
+      setBadge('jsonp', 'ok', '✓ Pass');
+      results.jsonpPing = { ok: true, data: data, ms: ms };
+      cb(true);
+    } else {
+      var html = tr('Result', badge('warn','Unexpected response')) + tr('Raw', raw(data)) + tr('Time', ms + 'ms') +
+        fix('Script responded but the ping action is not recognised — replace Apps Script code with sulit-apps-script-v2.gs and redeploy.');
+      setRows('jsonp', html);
+      setBadge('jsonp', 'warn', '⚠ Unexpected');
+      results.jsonpPing = { ok: false, data: data, ms: ms };
+      cb(false);
+    }
+  });
+}
+
+// ── T4: getMembers ───────────────────────────────────────
+function testMembers(cb) {
+  setBadge('members', 'run', '<span class="spin">↻</span> Running');
+  jsonpGet('getMembers', '', function(data, ms, err) {
+    timings.getMembers = ms;
+    setMs('members', ms);
+    if (err) {
+      setRows('members', tr('Result', badge('err','Failed ✗')) + tr('Error', err) + tr('Time', ms + 'ms') + fix('Script not reachable. Fix Test 3 first.'));
+      setBadge('members', 'err', '✗ Fail');
+      results.members = { ok: false, error: err, ms: ms };
+      cb(false);
+    } else if (data && data.error) {
+      var f = data.error.indexOf('Admin Users') >= 0
+        ? 'Sheet tab must be named exactly <strong>Admin Users</strong> (case-sensitive). Rename it in Google Sheets.'
+        : 'Check Apps Script executions log: Extensions → Apps Script → Executions.';
+      setRows('members', tr('Result', badge('err','Script error ✗')) + tr('Error', data.error) + tr('Raw', raw(data)) + tr('Time', ms + 'ms') + fix(f));
+      setBadge('members', 'err', '✗ Fail');
+      results.members = { ok: false, error: data.error, ms: ms };
+      cb(false);
+    } else if (data && data.members !== undefined) {
+      var names = data.members.map(function(m){ return m.name; }).join(', ');
+      var warn = data.members.length === 0;
+      setRows('members',
+        tr('Result', warn ? badge('warn','No members ⚠') : badge('ok', data.members.length + ' members ✓')) +
+        tr('Names', names || '<em>(none)</em>') +
+        tr('Raw', raw(data)) + tr('Time', ms + 'ms') +
+        (warn ? fix('Admin Users sheet exists but has no active entries. Add staff rows with Active = Yes.') : '')
+      );
+      setBadge('members', warn ? 'warn' : 'ok', warn ? '⚠ Empty' : '✓ Pass');
+      results.members = { ok: !warn, count: data.members.length, names: names, ms: ms };
+      cb(!warn);
+    } else {
+      setRows('members', tr('Result', badge('warn','Unexpected')) + tr('Raw', raw(data)) + fix('Response shape not recognised — check Apps Script version.'));
+      setBadge('members', 'warn', '⚠ Unexpected');
+      results.members = { ok: false, data: data, ms: ms };
+      cb(false);
+    }
+  });
+}
+
+// ── T5: getData Reservations ─────────────────────────────
+function testSheet(sheetKey, sheetName, cb) {
+  setBadge(sheetKey, 'run', '<span class="spin">↻</span> Running');
+  jsonpGet('getData', 'sheet=' + encodeURIComponent(sheetName), function(data, ms, err) {
+    timings[sheetKey] = ms;
+    setMs(sheetKey, ms);
+    if (err) {
+      setRows(sheetKey, tr('Result', badge('err','Failed ✗')) + tr('Error', err) + fix('Fix Tests 3 and 4 first.'));
+      setBadge(sheetKey, 'err', '✗ Fail');
+      results[sheetKey] = { ok: false, error: err, ms: ms };
+      cb(false, 0, null);
+    } else if (data && data.error) {
+      setRows(sheetKey, tr('Result', badge('err','Script error ✗')) + tr('Error', data.error) + tr('Raw', raw(data)) + fix('Sheet "' + sheetName + '" may not exist. Check spreadsheet tab names.'));
+      setBadge(sheetKey, 'err', '✗ Fail');
+      results[sheetKey] = { ok: false, error: data.error, ms: ms };
+      cb(false, 0, null);
+    } else if (data && data.rows !== undefined) {
+      var sample = data.rows.length > 0 ? data.rows[0] : null;
+      var keys = sample ? Object.keys(sample).filter(function(k){ return k.charAt(0) !== '_'; }) : [];
+      setRows(sheetKey,
+        tr('Result', badge('ok', data.rows.length + ' rows ✓')) +
+        tr('Columns found', keys.length ? keys.join(', ') : '(empty)') +
+        tr('Sample row (first)', sample ? raw(sample) : '(empty sheet)') +
+        tr('Time', ms + 'ms')
+      );
+      setBadge(sheetKey, 'ok', '✓ Pass');
+      results[sheetKey] = { ok: true, rowCount: data.rows.length, keys: keys, sample: sample, ms: ms };
+      cb(true, data.rows.length, data.rows);
+    } else {
+      setRows(sheetKey, tr('Result', badge('warn','Unexpected')) + tr('Raw', raw(data)));
+      setBadge(sheetKey, 'warn', '⚠ Unexpected');
+      results[sheetKey] = { ok: false, data: data, ms: ms };
+      cb(false, 0, null);
+    }
+  });
+}
+
+// ── T7: Auth flow ────────────────────────────────────────
+function testAuth(cb) {
+  setBadge('auth', 'run', '<span class="spin">↻</span> Running');
+  jsonpGet('auth', 'member=__health_check__&pin=0000', function(data, ms, err) {
+    timings.auth = ms;
+    setMs('auth', ms);
+    if (err) {
+      setRows('auth', tr('Result', badge('err','Failed ✗')) + tr('Error', err) + tr('Time', ms + 'ms') + fix('Auth endpoint not responding. Check script deployment.'));
+      setBadge('auth', 'err', '✗ Fail');
+      results.auth = { ok: false, error: err, ms: ms };
+      cb(false);
+    } else if (data && data.ok === false) {
+      // Expected — bad PIN should return {ok: false}
+      setRows('auth',
+        tr('Result', badge('ok','Endpoint working ✓')) +
+        tr('Behaviour', 'Correctly rejected invalid credentials') +
+        tr('Response', raw(data)) +
+        tr('Time', ms + 'ms') +
+        tr('Note', 'A false response to a bad PIN is the correct behaviour. Auth flow is operational.')
+      );
+      setBadge('auth', 'ok', '✓ Pass');
+      results.auth = { ok: true, ms: ms };
+      cb(true);
+    } else if (data && data.ok === true) {
+      setRows('auth', tr('Result', badge('err','Security issue ✗')) + tr('Issue', 'Script accepted an invalid credential — this should not happen.') + tr('Response', raw(data)) + fix('Review your Admin Users sheet for entries with blank or "0000" passcodes.'));
+      setBadge('auth', 'err', '✗ Security');
+      results.auth = { ok: false, issue: 'accepted_invalid_cred', ms: ms };
+      cb(false);
+    } else {
+      setRows('auth', tr('Result', badge('warn','Unexpected')) + tr('Raw', raw(data)) + tr('Time', ms + 'ms'));
+      setBadge('auth', 'warn', '⚠ Unexpected');
+      results.auth = { ok: false, data: data, ms: ms };
+      cb(false);
+    }
+  });
+}
+
+// ══ DATA INTEGRITY ════════════════════════════════════════
+function runDataIntegrity(resRows, rentRows) {
+  var issues = [];
+  var checks = [];
+
+  function check(label, passed, detail) {
+    checks.push({ label: label, passed: passed, detail: detail });
+    if (!passed) issues.push(label);
+  }
+
+  // Reservations checks
+  if (resRows) {
+    check('Reservations: has rows', resRows.length > 0, resRows.length + ' rows found');
+    var resWithStatus = resRows.filter(function(r){ return r.status; });
+    check('Reservations: Status column present', resWithStatus.length > 0 || resRows.length === 0, resWithStatus.length + '/' + resRows.length + ' rows have a status');
+    var resWithDate = resRows.filter(function(r){ return r.date; });
+    check('Reservations: Date column present', resWithDate.length > 0 || resRows.length === 0, resWithDate.length + '/' + resRows.length + ' rows have a date');
+    var resWithEmail = resRows.filter(function(r){ return r.email; });
+    check('Reservations: Email field present', resWithEmail.length > 0 || resRows.length === 0, resWithEmail.length + '/' + resRows.length + ' rows have an email');
+    var resWithRowId = resRows.filter(function(r){ return r.rowId; });
+    check('Reservations: Row ID column present', resWithRowId.length > 0 || resRows.length === 0, resWithRowId.length + '/' + resRows.length + ' rows have a Row ID');
+  } else {
+    checks.push({ label: 'Reservations: data not loaded', passed: false, detail: 'Test 5 must pass first' });
+    issues.push('Reservations data not loaded');
+  }
+
+  // Rentals checks
+  if (rentRows) {
+    check('Group Rentals: has rows', rentRows.length > 0, rentRows.length + ' rows found');
+    var rentWithStatus = rentRows.filter(function(r){ return r.status; });
+    check('Group Rentals: Status column present', rentWithStatus.length > 0 || rentRows.length === 0, rentWithStatus.length + '/' + rentRows.length + ' rows have a status');
+  } else {
+    checks.push({ label: 'Group Rentals: data not loaded', passed: false, detail: 'Test 6 must pass first' });
+    issues.push('Group Rentals data not loaded');
+  }
+
+  var html = '<div style="display:flex;flex-direction:column;gap:6px">';
+  checks.forEach(function(c) {
+    html += '<div class="tr" style="background:' + (c.passed ? 'rgba(78,203,122,.04)' : 'rgba(224,96,96,.06)') + ';border-radius:3px;padding:8px 12px;border:1px solid ' + (c.passed ? 'rgba(78,203,122,.15)' : 'rgba(224,96,96,.2)') + '">'
+      + '<span class="tl">' + (c.passed ? '✓' : '✗') + '</span>'
+      + '<span class="tv"><strong style="color:' + (c.passed ? 'var(--green)' : 'var(--red)') + '">' + c.label + '</strong><br><span style="font-size:11px;color:var(--cream3)">' + c.detail + '</span></span>'
+      + '</div>';
+  });
+  html += '</div>';
+
+  if (issues.length === 0) {
+    html = '<div style="color:var(--green);font-size:12px;padding:10px;margin-bottom:12px">✓ All integrity checks passed.</div>' + html;
+  } else {
+    html = '<div style="color:var(--amber);font-size:12px;padding:10px;margin-bottom:12px">⚠ ' + issues.length + ' issue(s) found: ' + issues.join(', ') + '</div>' + html;
+  }
+
+  document.getElementById('data-integrity-output').innerHTML = html;
+  return issues;
+}
+
+// ══ MAIN RUN ══════════════════════════════════════════════
+function runDiagnostics() {
+  if (isRunning) return;
+  isRunning = true;
+  results = {};
+  timings = {};
+
+  var btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.textContent = '↻ Running…';
+
+  var gs = document.getElementById('global-status');
+  gs.className = 'status-pill pill-warn';
+  gs.textContent = 'Running…';
+
+  // Reset badges
+  ['env','fetch','jsonp','members','res','rent','auth'].forEach(function(id) {
+    setBadge(id, 'wait', 'Pending');
+    var ms = document.getElementById('tms-' + id);
+    if (ms) ms.textContent = '';
+    document.getElementById('tbody-' + id).classList.remove('open');
+  });
+
+  var startAll = Date.now();
+
+  // Run sequentially for clarity
+  testEnv();
+
+  testFetch(function() {
+    testJsonpPing(function() {
+      testMembers(function() {
+        var resRowsData = null, rentRowsData = null;
+        testSheet('res', 'Reservations', function(ok, count, rows) {
+          resRowsData = rows;
+          testSheet('rent', 'Group Rentals', function(ok2, count2, rows2) {
+            rentRowsData = rows2;
+            testAuth(function() {
+
+              // Finish up
+              var totalMs = Date.now() - startAll;
+              var passed = ['env','fetch','jsonpPing','members','res','rent','auth']
+                .filter(function(k){ return results[k] && results[k].ok; }).length;
+              var total = 7;
+              var integrityIssues = runDataIntegrity(resRowsData, rentRowsData);
+              var allOk = passed === total && integrityIssues.length === 0;
+              var anyErr = passed < total - 1;
+
+              // Update overview
+              var now = new Date();
+              document.getElementById('ov-last').textContent = now.toLocaleTimeString();
+              document.getElementById('ov-passed').textContent = passed;
+              document.getElementById('ov-passed-sub').textContent = 'of ' + total + ' tests';
+              document.getElementById('ov-latency').textContent = (timings.jsonpPing || '—') + 'ms';
+              document.getElementById('ov-members').textContent = results.members && results.members.count !== undefined ? results.members.count : '—';
+              document.getElementById('ov-members-sub').textContent = results.members && results.members.names ? results.members.names : 'from Admin Users sheet';
+              document.getElementById('ov-res').textContent = results.res && results.res.rowCount !== undefined ? results.res.rowCount : '—';
+              document.getElementById('ov-rent').textContent = results.rent && results.rent.rowCount !== undefined ? results.rent.rowCount : '—';
+
+              // Issues
+              var issueHtml = '';
+              ['env','fetch','jsonpPing','members','res','rent','auth'].forEach(function(k) {
+                var r = results[k];
+                if (r && !r.ok) {
+                  issueHtml += '<div style="padding:8px 0;border-bottom:1px solid rgba(200,146,42,.06);color:var(--red);font-size:12px">'
+                    + '✗ <strong>' + k + '</strong>' + (r.error ? ' — ' + r.error : '') + '</div>';
+                }
+              });
+              integrityIssues.forEach(function(iss) {
+                issueHtml += '<div style="padding:8px 0;border-bottom:1px solid rgba(200,146,42,.06);color:var(--amber);font-size:12px">⚠ ' + iss + '</div>';
+              });
+              document.getElementById('ov-issues').innerHTML = issueHtml || '<span style="color:var(--green);font-size:12px">✓ No issues found.</span>';
+
+              // Metric card colours
+              ['ov-passed','ov-latency','ov-members','ov-res','ov-rent'].forEach(function(id) {
+                var card = document.getElementById(id).closest('.metric-card');
+                card.className = 'metric-card ' + (allOk ? 'ok-card' : anyErr ? 'err-card' : 'warn-card');
+              });
+
+              // Global status
+              gs.className = 'status-pill ' + (allOk ? 'pill-ok' : anyErr ? 'pill-err' : 'pill-warn');
+              gs.textContent = allOk ? '✓ All Good' : anyErr ? '✗ Issues Found' : '⚠ Warnings';
+
+              // Last run label
+              document.getElementById('last-run-label').textContent = 'Last run: ' + now.toLocaleTimeString();
+
+              // Nav dots
+              document.getElementById('dot-tests').classList.toggle('show', passed < total);
+              document.getElementById('dot-data').classList.toggle('show', integrityIssues.length > 0);
+
+              // History
+              addHistory(now, passed, total, integrityIssues.length, totalMs);
+
+              btn.disabled = false;
+              btn.textContent = '▶ Run Diagnostics';
+              isRunning = false;
+            });
+          });
+        });
+      });
+    });
+  });
+}
+
+// ══ HISTORY ══════════════════════════════════════════════
+function addHistory(ts, passed, total, intIssues, totalMs) {
+  runHistory.unshift({
+    ts: ts, passed: passed, total: total, intIssues: intIssues, totalMs: totalMs,
+    members: results.members && results.members.count !== undefined ? results.members.count : '—',
+    res: results.res && results.res.rowCount !== undefined ? results.res.rowCount : '—',
+    rent: results.rent && results.rent.rowCount !== undefined ? results.rent.rowCount : '—',
+    latency: timings.jsonpPing || '—'
+  });
+
+  var allOk = passed === total && intIssues === 0;
+  var anyErr = passed < total - 1;
+  var pill = allOk ? 'pill-ok' : anyErr ? 'pill-err' : 'pill-warn';
+  var label = allOk ? '✓ Healthy' : anyErr ? '✗ Issues' : '⚠ Warning';
+
+  var tbody = document.getElementById('history-body');
+  if (runHistory.length === 1) tbody.innerHTML = '';
+
+  var row = '<tr>'
+    + '<td style="color:var(--cream3)">' + runHistory.length + '</td>'
+    + '<td>' + ts.toLocaleString() + '</td>'
+    + '<td>' + passed + ' / ' + total + '</td>'
+    + '<td>' + (results.members && results.members.count !== undefined ? results.members.count : '—') + '</td>'
+    + '<td>' + (results.res && results.res.rowCount !== undefined ? results.res.rowCount : '—') + '</td>'
+    + '<td>' + (results.rent && results.rent.rowCount !== undefined ? results.rent.rowCount : '—') + '</td>'
+    + '<td>' + (timings.jsonpPing ? timings.jsonpPing + 'ms' : '—') + '</td>'
+    + '<td><span class="status-pill ' + pill + '" style="font-size:9px;padding:2px 7px">' + label + '</span></td>'
+    + '</tr>';
+  tbody.insertAdjacentHTML('afterbegin', row);
+}
+
+// ══ REPORT ═══════════════════════════════════════════════
+function generateReport() {
+  var now = new Date();
+  var lines = [];
+
+  lines.push('╔══════════════════════════════════════════════════════════════╗');
+  lines.push('║         SULIT LOUNGE — SYSTEM HEALTH REPORT                  ║');
+  lines.push('╚══════════════════════════════════════════════════════════════╝');
+  lines.push('');
+  lines.push('Generated:   ' + now.toISOString());
+  lines.push('System:      ' + cfg.name);
+  lines.push('Admin URL:   ' + cfg.adminUrl);
+  lines.push('Sheet URL:   ' + cfg.sheetUrl);
+  lines.push('Script URL:  ' + cfg.url);
+  lines.push('Run from:    ' + location.href);
+  lines.push('');
+
+  // Environment
+  lines.push('── ENVIRONMENT ─────────────────────────────────────────────');
+  lines.push('Protocol:    ' + location.protocol);
+  lines.push('Host:        ' + location.hostname);
+  lines.push('Browser:     ' + navigator.userAgent.substring(0, 80));
+  lines.push('Online:      ' + navigator.onLine);
+  lines.push('');
+
+  // Test results
+  lines.push('── TEST RESULTS ────────────────────────────────────────────');
+  var testMap = [
+    ['1', 'Browser Environment', 'env'],
+    ['2', 'Network Reachability (fetch)', 'fetch'],
+    ['3', 'Script Ping (JSONP)', 'jsonpPing'],
+    ['4', 'Admin Users Sheet (getMembers)', 'members'],
+    ['5', 'Reservations Sheet (getData)', 'res'],
+    ['6', 'Group Rentals Sheet (getData)', 'rent'],
+    ['7', 'Auth Flow Check', 'auth'],
+  ];
+
+  var totalPassed = 0;
+  testMap.forEach(function(t) {
+    var r = results[t[2]];
+    if (!r) { lines.push('[?] Test ' + t[0] + ': ' + t[1] + ' — NOT RUN'); return; }
+    var status = r.ok ? '[✓]' : '[✗]';
+    if (r.ok) totalPassed++;
+    lines.push(status + ' Test ' + t[0] + ': ' + t[1]);
+    if (r.ms) lines.push('    Time: ' + r.ms + 'ms');
+    if (r.error) lines.push('    Error: ' + r.error);
+    if (r.count !== undefined) lines.push('    Members: ' + r.count + ' — ' + (r.names || '(none)'));
+    if (r.rowCount !== undefined) lines.push('    Rows: ' + r.rowCount);
+    if (r.data) lines.push('    Raw response: ' + JSON.stringify(r.data));
+    if (r.issue) lines.push('    Issue: ' + r.issue);
+    if (r.keys) lines.push('    Columns: ' + r.keys.join(', '));
+  });
+  lines.push('');
+  lines.push('SUMMARY: ' + totalPassed + ' / ' + testMap.length + ' tests passed');
+  lines.push('');
+
+  // Timings
+  lines.push('── TIMINGS ─────────────────────────────────────────────────');
+  var timingKeys = { fetch: 'fetch() ping', jsonpPing: 'JSONP ping', getMembers: 'getMembers', res: 'getData (Reservations)', rent: 'getData (Group Rentals)', auth: 'Auth flow' };
+  Object.keys(timings).forEach(function(k) {
+    lines.push((timingKeys[k] || k) + ': ' + timings[k] + 'ms' + (timings[k] > 8000 ? ' ⚠ SLOW' : timings[k] > 4000 ? ' (moderate)' : ''));
+  });
+  lines.push('');
+
+  // Issues
+  var issues = [];
+  testMap.forEach(function(t) { var r = results[t[2]]; if (r && !r.ok) issues.push('Test ' + t[0] + ' failed: ' + t[1] + (r.error ? ' — ' + r.error : '')); });
+  lines.push('── ISSUES ──────────────────────────────────────────────────');
+  if (issues.length === 0) {
+    lines.push('None. All tests passed.');
+  } else {
+    issues.forEach(function(i) { lines.push('• ' + i); });
+  }
+  lines.push('');
+
+  // AI instructions
+  lines.push('── HOW TO USE THIS REPORT WITH AI ──────────────────────────');
+  lines.push('1. Copy this entire report.');
+  lines.push('2. Open Claude at https://claude.ai');
+  lines.push('3. Paste the report into a new chat.');
+  lines.push('4. Add a short description of the problem, for example:');
+  if (issues.length > 0) {
+    lines.push('   "' + issues[0] + ' — what should I check and how do I fix it?"');
+  } else {
+    lines.push('   "Everything is passing. Can you confirm the system looks healthy?');
+    lines.push('    Are there any performance concerns based on the timings?"');
+  }
+  lines.push('5. If the issue recurs, paste 2–3 reports together to show the pattern.');
+  lines.push('');
+  lines.push('Relevant files to attach if asked:');
+  lines.push('• admin/index.html  — the admin page with SCRIPT_URL and login logic');
+  lines.push('• sulit-apps-script-v2.gs  — the Google Apps Script backend');
+  lines.push('');
+  lines.push('╔══════════════════════════════════════════════════════════════╗');
+  lines.push('║                      END OF REPORT                           ║');
+  lines.push('╚══════════════════════════════════════════════════════════════╝');
+
+  reportText = lines.join('\n');
+  document.getElementById('report-output').textContent = reportText;
+  document.getElementById('copy-report-btn').disabled = false;
+  document.getElementById('dl-report-btn').disabled = false;
+  document.getElementById('clear-report-btn').disabled = false;
+}
+
+function copyReport() {
+  if (!reportText) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(reportText).then(function() {
+      var btn = document.getElementById('copy-report-btn');
+      btn.textContent = '✅ Copied!';
+      setTimeout(function() { btn.textContent = '📋 Copy to Clipboard'; }, 2500);
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = reportText;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
+function downloadReport() {
+  if (!reportText) return;
+  var fn = 'sulit-health-' + new Date().toISOString().slice(0,10) + '-' + new Date().toTimeString().slice(0,5).replace(':','') + '.txt';
+  var blob = new Blob([reportText], { type: 'text/plain;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = fn;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function clearReport() {
+  reportText = '';
+  document.getElementById('report-output').textContent = 'Report cleared.';
+  document.getElementById('copy-report-btn').disabled = true;
+  document.getElementById('dl-report-btn').disabled = true;
+  document.getElementById('clear-report-btn').disabled = true;
+}
+
+// ══ INIT ══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function() {
+  loadConfig();
+});
+</script>
+</body>
+</html>
